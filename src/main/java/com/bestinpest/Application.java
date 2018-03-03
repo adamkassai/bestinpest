@@ -29,6 +29,7 @@ public class Application {
         return (args) -> {
 
             repository.save(new Lobby("Elso probajatek"));
+            repository.save(new Lobby("Ez mar a masodik"));
 
            /* // save a couple of customers
             repository.save(new Customer("Jack", "Bauer"));

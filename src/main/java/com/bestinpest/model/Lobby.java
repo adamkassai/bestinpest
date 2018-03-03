@@ -1,8 +1,8 @@
 package com.bestinpest.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import jdk.nashorn.internal.objects.annotations.Constructor;
+
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
@@ -13,11 +13,31 @@ public class Lobby {
     private Long id;
 
     private String name;
+
+    @ManyToOne
+    @JoinColumn(name="leaderId")
     private Player leader;
+
     private int maxPlayerNumber;
     private String password;
+
+    @ManyToOne
+    @JoinColumn(name="criminalId")
     private Player criminal;
+
+    @OneToMany(mappedBy="lobby")
     private List<Player> players;
+
+    public Lobby() {}
+
+    public Lobby(String name, Player leader, int maxPlayerNumber, String password, Player criminal, List<Player> players) {
+        this.name = name;
+        this.leader = leader;
+        this.maxPlayerNumber = maxPlayerNumber;
+        this.password = password;
+        this.criminal = criminal;
+        this.players = players;
+    }
 
     public Lobby(String name) {
         this.name = name;
