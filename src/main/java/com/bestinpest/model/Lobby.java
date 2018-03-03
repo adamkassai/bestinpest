@@ -75,10 +75,6 @@ public class Lobby {
         this.maxPlayerNumber = maxPlayerNumber;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public void setPassword(String password) {
         this.password = password;
     }
