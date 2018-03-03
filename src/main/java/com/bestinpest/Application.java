@@ -1,5 +1,7 @@
-package hello;
+package com.bestinpest;
 
+import com.bestinpest.model.Lobby;
+import com.bestinpest.repository.LobbyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.TopicExchange;
@@ -23,9 +25,12 @@ public class Application {
     }
 
     @Bean
-    public CommandLineRunner demo(CustomerRepository repository) {
+    public CommandLineRunner demo(LobbyRepository repository) {
         return (args) -> {
-            // save a couple of customers
+
+            repository.save(new Lobby("Elso probajatek"));
+
+           /* // save a couple of customers
             repository.save(new Customer("Jack", "Bauer"));
             repository.save(new Customer("Chloe", "O'Brian"));
             repository.save(new Customer("Kim", "Bauer"));
@@ -53,7 +58,7 @@ public class Application {
             for (Customer bauer : repository.findByLastName("Bauer")) {
                 log.info(bauer.toString());
             }
-            log.info("");
+            log.info("");*/
         };
     }
 
