@@ -1,6 +1,7 @@
 package com.bestinpest;
 
 import com.bestinpest.model.Lobby;
+import com.bestinpest.model.Player;
 import com.bestinpest.repository.LobbyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootApplication
 public class Application {
@@ -32,6 +36,7 @@ public class Application {
             repository.save(new Lobby("Ez mar a masodik"));
 
            /* // save a couple of customers
+           Lobby(String name, Player leader, int maxPlayerNumber, String password, Player criminal, List<Player> players)
             repository.save(new Customer("Jack", "Bauer"));
             repository.save(new Customer("Chloe", "O'Brian"));
             repository.save(new Customer("Kim", "Bauer"));
