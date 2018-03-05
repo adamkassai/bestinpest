@@ -62,6 +62,24 @@ public class LobbyController {
         return lobbyRepository.save(lobby);
     }
 
+    @PostMapping("/lobbies/{id}/criminal")
+    public Lobby setCriminal(@PathVariable(value = "id") Long id, @Valid @RequestBody Player player) {
+
+        Lobby lobby = lobbyRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
+
+        Player existingPlayer = playerRepository.findById(player.getId())
+                .orElseThrow(() -> new NotFoundException("Player", "id", player.getId()));
+
+        if (!lobby.getPlayers().contains(existingPlayer))
+        {
+            throw new NotFoundException("Lobby", "player", player);
+        }
+
+        lobby.setCriminal(existingPlayer);
+        return lobbyRepository.save(lobby);
+    }
+
     @GetMapping("/lobbies/{id}")
     public Lobby getLobbyById(@PathVariable(value = "id") Long id) {
         return lobbyRepository.findById(id)
