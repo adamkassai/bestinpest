@@ -62,6 +62,20 @@ public class LobbyController {
         return lobbyRepository.save(lobby);
     }
 
+    @PostMapping("/lobbies/{id}/join/auth")
+    public ResponseEntity<?> authToLobby(@PathVariable(value = "id") Long id, @RequestBody String password) {
+
+        Lobby lobby = lobbyRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
+
+        if (!lobby.isValidPassword(password))
+        {
+            return ResponseEntity.status(401).build();
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/lobbies/{id}/criminal")
     public Lobby setCriminal(@PathVariable(value = "id") Long id, @Valid @RequestBody Player player) {
 

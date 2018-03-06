@@ -94,4 +94,17 @@ public class Lobby {
     public void setPlayers(List<Player> players) {
         this.players = players;
     }
+
+    public boolean getPasswordSet()
+    {
+        return (password!=null);
+    }
+
+    public boolean isValidPassword(String password) {
+
+        if (this.password==null)
+            return true;
+
+        return (this.password == password);
+    }
 }
