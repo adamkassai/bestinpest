@@ -37,13 +37,16 @@ public class LobbyController {
 
     @PostMapping("/lobbies")
     public Lobby createLobby(@Valid @RequestBody Lobby lobby) {
-        Player leader = lobby.getLeader();
-        playerRepository.save(leader);
-        lobbyRepository.save(lobby);
 
-        lobby.getPlayers().add(leader);
-        leader.setLobby(lobby);
-        playerRepository.save(leader);
+        if (lobby.getLeader()!=null) {
+            Player leader = lobby.getLeader();
+            playerRepository.save(leader);
+            lobbyRepository.save(lobby);
+
+            lobby.getPlayers().add(leader);
+            leader.setLobby(lobby);
+            playerRepository.save(leader);
+        }
         return lobbyRepository.save(lobby);
     }
 

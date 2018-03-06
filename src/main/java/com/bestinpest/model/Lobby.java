@@ -3,6 +3,7 @@ package com.bestinpest.model;
 import jdk.nashorn.internal.objects.annotations.Constructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -26,7 +27,7 @@ public class Lobby {
     private Player criminal;
 
     @OneToMany(mappedBy="lobby")
-    private List<Player> players;
+    private List<Player> players = new ArrayList<>();
 
     public Lobby() {}
 
