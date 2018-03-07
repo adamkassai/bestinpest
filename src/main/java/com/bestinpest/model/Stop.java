@@ -63,6 +63,10 @@ public class Stop {
         this.lon = lon;
     }
 
+    public Junction getJunction() {
+        return junction;
+    }
+
     public void setJunction(Junction junction) {
         this.junction = junction;
     }

@@ -51,38 +51,43 @@ public class FutarToDB implements CommandLineRunner {
             String name = stopObject.get("name").getAsString();
             Double lat = stopObject.get("lat").getAsDouble();
             Double lon = stopObject.get("lon").getAsDouble();
-            Stop stop = new Stop(id, name, lat, lon);
-
-
-
-            if (stopObject.get("parentStationId")!=null) {
-
-                String parentStationId = stopObject.get("parentStationId").getAsString();
-
-            Optional<Junction> junction = junctionRepository.findById(parentStationId);
-
-            if (!junction.isPresent()) {
-                Junction newJunction = new Junction(parentStationId, name);
-                junctionRepository.save(newJunction);
-                stop.setJunction(newJunction);
-            }else{
-                stop.setJunction(junction.get());
-            }
-
-            }
-
-            stopRepository.save(stop);
 
 
             JsonArray routesArray = stopObject.get("routeIds").getAsJsonArray();
 
-            for (JsonElement routeElement: routesArray)
-            {
-                String routeId = routeElement.getAsString();
-                if (!routeList.contains(routeId)) {
-                    routeList.add(routeId);
+            if (routesArray.size()>0) {
+
+                Stop stop = new Stop(id, name, lat, lon);
+
+
+                for (JsonElement routeElement : routesArray) {
+                    String routeId = routeElement.getAsString();
+                    if (!routeList.contains(routeId)) {
+                        routeList.add(routeId);
+                    }
                 }
+
+
+                if (stopObject.get("parentStationId") != null) {
+
+                    String parentStationId = stopObject.get("parentStationId").getAsString();
+
+                    Optional<Junction> junction = junctionRepository.findById(parentStationId);
+
+                    if (!junction.isPresent()) {
+                        Junction newJunction = new Junction(parentStationId, name);
+                        junctionRepository.save(newJunction);
+                        stop.setJunction(newJunction);
+                    } else {
+                        stop.setJunction(junction.get());
+                    }
+
+                }
+
+                stopRepository.save(stop);
+
             }
+
         }
 
 

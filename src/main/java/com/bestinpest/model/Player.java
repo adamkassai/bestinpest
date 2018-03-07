@@ -17,6 +17,10 @@ public class Player {
     @JoinColumn(name="lobbyId")
     private Lobby lobby;
 
+    @ManyToOne
+    @JoinColumn(name="junctionId")
+    private Junction junction;
+
     private String name;
 
     public Player() {
@@ -44,5 +48,13 @@ public class Player {
 
     public void setLobby(Lobby lobby) {
         this.lobby = lobby;
+    }
+
+    public Junction getJunction() {
+        return junction;
+    }
+
+    public void setJunction(Junction junction) {
+        this.junction = junction;
     }
 }

@@ -1,10 +1,14 @@
 package com.bestinpest.controller;
 
 import com.bestinpest.exception.NotFoundException;
+import com.bestinpest.model.Coordinates;
+import com.bestinpest.model.Junction;
 import com.bestinpest.model.Lobby;
 import com.bestinpest.model.Player;
+import com.bestinpest.repository.JunctionRepository;
 import com.bestinpest.repository.LobbyRepository;
 import com.bestinpest.repository.PlayerRepository;
+import com.bestinpest.service.RouteService;
 import com.rabbitmq.tools.json.JSONWriter;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +29,13 @@ public class LobbyController {
     PlayerRepository playerRepository;
 
     @Autowired
+    JunctionRepository junctionRepository;
+
+    @Autowired
     RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    RouteService routeService;
 
     JSONWriter jsonWriter = new JSONWriter();
 
@@ -65,6 +75,16 @@ public class LobbyController {
         return lobbyRepository.save(lobby);
     }
 
+
+    @PostMapping("/lobbies/{id}/available-junctions")
+    public List<Junction> getFreeJunctionsNearby(@PathVariable(value = "id") Long id, @RequestBody Coordinates coords) {
+
+        Lobby lobby = lobbyRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
+
+        return routeService.getFreeJunctionsNearby(coords, lobby.getPlayers());
+    }
+
     @PostMapping("/lobbies/{id}/join/auth")
     public ResponseEntity<?> authToLobby(@PathVariable(value = "id") Long id, @RequestBody String password) {
 
@@ -88,10 +108,16 @@ public class LobbyController {
         Player existingPlayer = playerRepository.findById(player.getId())
                 .orElseThrow(() -> new NotFoundException("Player", "id", player.getId()));
 
+        Junction existingJunction = junctionRepository.findById(player.getJunction().getId())
+                .orElseThrow(() -> new NotFoundException("Junction", "id", player.getJunction().getId()));
+
         if (!lobby.getPlayers().contains(existingPlayer))
         {
             throw new NotFoundException("Lobby", "player", player);
         }
+
+        existingPlayer.setJunction(existingJunction);
+        playerRepository.save(existingPlayer);
 
         lobby.setCriminal(existingPlayer);
         return lobbyRepository.save(lobby);
