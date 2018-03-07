@@ -1,5 +1,7 @@
 package com.bestinpest.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jdk.nashorn.internal.objects.annotations.Constructor;
 
 import javax.persistence.*;
@@ -7,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class Lobby {
 
     @Id
