@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.Lob;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -85,6 +87,12 @@ public class LobbyController {
         return routeService.getFreeJunctionsNearby(lat, lon, lobby.getPlayers());
     }
 
+    @GetMapping("/lobbies/available-junctions")
+    public List<Junction> getFreeJunctionsNearbyForFirstPlayer(@RequestParam("lat") double lat, @RequestParam("lon") double lon) {
+
+        return routeService.getFreeJunctionsNearby(lat, lon, new ArrayList<>());
+    }
+
     @PostMapping("/lobbies/{id}/join/auth")
     public ResponseEntity<?> authToLobby(@PathVariable(value = "id") Long id, @RequestBody String password) {
 
@@ -134,8 +142,32 @@ public class LobbyController {
             return ResponseEntity.notFound().build();
         }
 
-        playerRepository.delete(lobby.get().getPlayers());
-        lobbyRepository.delete(lobby.get());
+        Lobby existingLobby = lobby.get();
+        existingLobby.setLeader(null);
+        lobbyRepository.save(existingLobby);
+        playerRepository.delete(existingLobby.getPlayers());
+        lobbyRepository.delete(existingLobby);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/lobbies/{id}/players/{playerId}")
+    public ResponseEntity<?> deletePlayer(@PathVariable(value = "id") Long id, @PathVariable(value = "playerId") Long playerId) {
+
+        Optional<Lobby> lobby = lobbyRepository.findById(id);
+
+        if (!lobby.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Optional<Player> player = playerRepository.findById(playerId);
+
+        if (!player.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        Lobby existingLobby = lobby.get();
+        existingLobby.getPlayers().remove(player);
+        lobbyRepository.save(existingLobby);
+        playerRepository.delete(player.get());
         return ResponseEntity.ok().build();
     }
 

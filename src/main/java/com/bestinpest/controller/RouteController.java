@@ -1,5 +1,6 @@
 package com.bestinpest.controller;
 
+import com.bestinpest.exception.NotFoundException;
 import com.bestinpest.model.Junction;
 import com.bestinpest.model.Route;
 import com.bestinpest.repository.JunctionRepository;
@@ -7,6 +8,7 @@ import com.bestinpest.repository.RouteRepository;
 import com.bestinpest.repository.StopRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -31,6 +33,12 @@ public class RouteController {
     @GetMapping("/routes")
     public List<Route> routes() {
         return routeRepository.findAll();
+    }
+
+    @GetMapping("/junctions/{id}")
+    public Junction getJunctionById(@PathVariable(value = "id") String id) {
+        return junctionRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Junction", "id", id));
     }
 
 }

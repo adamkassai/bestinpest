@@ -3,6 +3,7 @@ package com.bestinpest;
 import com.bestinpest.model.Lobby;
 import com.bestinpest.model.Player;
 import com.bestinpest.repository.LobbyRepository;
+import com.bestinpest.repository.PlayerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.TopicExchange;
@@ -36,15 +37,32 @@ public class Application {
     }
 
     @Bean
-    public CommandLineRunner demo(LobbyRepository repository) {
+    public CommandLineRunner demo(LobbyRepository lobbyRepository, PlayerRepository playerRepository) {
         return (args) -> {
 
-            repository.save(new Lobby("Elso probajatek"));
-            repository.save(new Lobby("Ez mar a masodik"));
+            Player player1 = new Player("Adam", "BKK_CSF01108");
+            Player player2 = new Player("Bobi", "BKK_CS009026");
+            playerRepository.save(player1);
+            playerRepository.save(player2);
+
+            List<Player> players = new ArrayList<>();
+            players.add(player1);
+            players.add(player2);
+
+            Lobby lobby = new Lobby("Elso fullos probajatek", player1, 5, "asdf", player2.getId(), players);
+            lobbyRepository.save(lobby);
+
+            player1.setLobby(lobby);
+            playerRepository.save(player1);
+            player2.setLobby(lobby);
+            playerRepository.save(player2);
+
+            lobbyRepository.save(new Lobby("Elso probajatek"));
+            lobbyRepository.save(new Lobby("Ez mar a masodik"));
 
            /* // save a couple of customers
            Lobby(String name, Player leader, int maxPlayerNumber, String password, Player criminal, List<Player> players)
-            repository.save(new Customer("Jack", "Bauer"));
+            reposditory.save(new Customer("Jack", "Bauer"));
             repository.save(new Customer("Chloe", "O'Brian"));
             repository.save(new Customer("Kim", "Bauer"));
             repository.save(new Customer("David", "Palmer"));
