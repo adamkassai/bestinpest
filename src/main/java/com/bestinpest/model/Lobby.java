@@ -1,6 +1,7 @@
 package com.bestinpest.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jdk.nashorn.internal.objects.annotations.Constructor;
 
@@ -9,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class Lobby {
 
     @Id
@@ -24,22 +24,19 @@ public class Lobby {
 
     private int maxPlayerNumber;
     private String password;
-
-    @ManyToOne
-    @JoinColumn(name="criminalId")
-    private Player criminal;
+    private Long criminalId;
 
     @OneToMany(mappedBy="lobby")
     private List<Player> players = new ArrayList<>();
 
     public Lobby() {}
 
-    public Lobby(String name, Player leader, int maxPlayerNumber, String password, Player criminal, List<Player> players) {
+    public Lobby(String name, Player leader, int maxPlayerNumber, String password, Long criminalId, List<Player> players) {
         this.name = name;
         this.leader = leader;
         this.maxPlayerNumber = maxPlayerNumber;
         this.password = password;
-        this.criminal = criminal;
+        this.criminalId = criminalId;
         this.players = players;
     }
 
@@ -83,12 +80,12 @@ public class Lobby {
         this.password = password;
     }
 
-    public Player getCriminal() {
-        return criminal;
+    public Long getCriminalId() {
+        return criminalId;
     }
 
-    public void setCriminal(Player criminal) {
-        this.criminal = criminal;
+    public void setCriminalId(Long criminalId) {
+        this.criminalId = criminalId;
     }
 
     public List<Player> getPlayers() {

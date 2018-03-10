@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RouteService {
@@ -22,7 +23,7 @@ public class RouteService {
     @Autowired
     RouteRepository routeRepository;
 
-    public List<Junction> getFreeJunctionsNearby(Coordinates coords, List<Player> players)
+    public List<Junction> getFreeJunctionsNearby(double lat, double lon, List<Player> players)
     {
         List<Junction> junctions = junctionRepository.findAll();
         List<Junction> reservedJunctions = new ArrayList<>();
@@ -31,10 +32,14 @@ public class RouteService {
 
         for (Player player: players)
         {
-            Junction reservedJunction = player.getJunction();
-            reservedJunctions.add(reservedJunction);
-            junctionsInOneStepRadius.addAll(getJunctionsFromJunction(reservedJunction));
-            junctionsInOneStepRadius.addAll(getJunctionsToJunction(reservedJunction));
+
+            Optional<Junction> reservedJunction = junctionRepository.findById(player.getJunctionId());
+
+            if (reservedJunction.isPresent()) {
+                reservedJunctions.add(reservedJunction.get());
+                junctionsInOneStepRadius.addAll(getJunctionsFromJunction(reservedJunction.get()));
+                junctionsInOneStepRadius.addAll(getJunctionsToJunction(reservedJunction.get()));
+            }
         }
 
         for (Junction junction: junctionsInOneStepRadius)

@@ -76,13 +76,13 @@ public class LobbyController {
     }
 
 
-    @PostMapping("/lobbies/{id}/available-junctions")
-    public List<Junction> getFreeJunctionsNearby(@PathVariable(value = "id") Long id, @RequestBody Coordinates coords) {
+    @GetMapping("/lobbies/{id}/available-junctions")
+    public List<Junction> getFreeJunctionsNearby(@PathVariable(value = "id") Long id, @RequestParam("lat") double lat, @RequestParam("lon") double lon) {
 
         Lobby lobby = lobbyRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
 
-        return routeService.getFreeJunctionsNearby(coords, lobby.getPlayers());
+        return routeService.getFreeJunctionsNearby(lat, lon, lobby.getPlayers());
     }
 
     @PostMapping("/lobbies/{id}/join/auth")
@@ -108,18 +108,14 @@ public class LobbyController {
         Player existingPlayer = playerRepository.findById(player.getId())
                 .orElseThrow(() -> new NotFoundException("Player", "id", player.getId()));
 
-        Junction existingJunction = junctionRepository.findById(player.getJunction().getId())
-                .orElseThrow(() -> new NotFoundException("Junction", "id", player.getJunction().getId()));
-
         if (!lobby.getPlayers().contains(existingPlayer))
         {
             throw new NotFoundException("Lobby", "player", player);
         }
 
-        existingPlayer.setJunction(existingJunction);
         playerRepository.save(existingPlayer);
 
-        lobby.setCriminal(existingPlayer);
+        lobby.setCriminalId(existingPlayer.getId());
         return lobbyRepository.save(lobby);
     }
 
@@ -138,6 +134,7 @@ public class LobbyController {
             return ResponseEntity.notFound().build();
         }
 
+        playerRepository.delete(lobby.get().getPlayers());
         lobbyRepository.delete(lobby.get());
         return ResponseEntity.ok().build();
     }

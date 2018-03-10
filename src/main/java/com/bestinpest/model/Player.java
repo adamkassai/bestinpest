@@ -1,12 +1,12 @@
 package com.bestinpest.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
 
 @Entity
-@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class Player {
 
     @Id
@@ -15,11 +15,10 @@ public class Player {
 
     @ManyToOne
     @JoinColumn(name="lobbyId")
+    @JsonIgnore
     private Lobby lobby;
 
-    @ManyToOne
-    @JoinColumn(name="junctionId")
-    private Junction junction;
+    private String junctionId;
 
     private String name;
 
@@ -27,6 +26,11 @@ public class Player {
     }
 
     public Player(String name) {
+        this.name = name;
+    }
+
+    public Player(String name, String junctionId) {
+        this.junctionId = junctionId;
         this.name = name;
     }
 
@@ -50,11 +54,11 @@ public class Player {
         this.lobby = lobby;
     }
 
-    public Junction getJunction() {
-        return junction;
+    public String getJunctionId() {
+        return junctionId;
     }
 
-    public void setJunction(Junction junction) {
-        this.junction = junction;
+    public void setJunctionId(String junctionId) {
+        this.junctionId = junctionId;
     }
 }
