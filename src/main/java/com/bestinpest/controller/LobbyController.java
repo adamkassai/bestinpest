@@ -1,7 +1,7 @@
 package com.bestinpest.controller;
 
+import com.bestinpest.model.RabbitMessage;
 import com.bestinpest.exception.NotFoundException;
-import com.bestinpest.model.Coordinates;
 import com.bestinpest.model.Junction;
 import com.bestinpest.model.Lobby;
 import com.bestinpest.model.Player;
@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.Lob;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +42,9 @@ public class LobbyController {
 
     @GetMapping("/lobbies")
     public List<Lobby> lobbies() {
-        rabbitTemplate.convertAndSend("bip-exchange", "", jsonWriter.write(lobbyRepository.findAll()));
+
+        RabbitMessage m = new RabbitMessage("Proba uzenet", "lobbies", lobbyRepository.findAll());
+        rabbitTemplate.convertAndSend("bip-exchange", "", m.toString());
         return lobbyRepository.findAll();
     }
 
