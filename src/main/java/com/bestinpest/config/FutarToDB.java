@@ -1,5 +1,6 @@
-package com.bestinpest;
+package com.bestinpest.config;
 
+import com.bestinpest.Application;
 import com.bestinpest.model.Junction;
 import com.bestinpest.model.Route;
 import com.bestinpest.model.Stop;
