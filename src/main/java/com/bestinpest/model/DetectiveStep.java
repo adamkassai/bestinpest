@@ -18,9 +18,11 @@ public class DetectiveStep {
     @JsonIgnore
     private Game game;
 
+    private int round;
+
     @ElementCollection
     @MapKeyColumn(name="playerId")
-    private Map<String, Plan> plans = new HashMap<>();
+    private Map<Long, Plan> plans = new HashMap<>();
 
     public DetectiveStep() {
     }
@@ -45,11 +47,19 @@ public class DetectiveStep {
         this.game = game;
     }
 
-    public Map<String, Plan> getPlans() {
+    public Map<Long, Plan> getPlans() {
         return plans;
     }
 
-    public void setPlans(Map<String, Plan> plans) {
+    public void setPlans(Map<Long, Plan> plans) {
         this.plans = plans;
+    }
+
+    public int getRound() {
+        return round;
+    }
+
+    public void setRound(int round) {
+        this.round = round;
     }
 }

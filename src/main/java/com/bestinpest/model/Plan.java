@@ -1,10 +1,7 @@
 package com.bestinpest.model;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 public class Plan {
@@ -15,16 +12,17 @@ public class Plan {
 
     private String departureJunctionId;
     private String arrivalJunctionId;
-    private String routeId;
-    private String playerId;
+    private Long routeId;
+    private Long playerId;
 
     @ElementCollection
-    private Set<String> approvers = new HashSet();
+    @MapKeyColumn(name="playerId")
+    private Map<Long, String> reactions = new HashMap<>();
 
     public Plan() {
     }
 
-    public Plan(String departureJunctionId, String arrivalJunctionId, String routeId, String playerId) {
+    public Plan(String departureJunctionId, String arrivalJunctionId, Long routeId, Long playerId) {
         this.departureJunctionId = departureJunctionId;
         this.arrivalJunctionId = arrivalJunctionId;
         this.routeId = routeId;
@@ -55,27 +53,27 @@ public class Plan {
         this.arrivalJunctionId = arrivalJunctionId;
     }
 
-    public String getRouteId() {
+    public Long getRouteId() {
         return routeId;
     }
 
-    public void setRouteId(String routeId) {
+    public void setRouteId(Long routeId) {
         this.routeId = routeId;
     }
 
-    public String getPlayerId() {
+    public Long getPlayerId() {
         return playerId;
     }
 
-    public void setPlayerId(String playerId) {
+    public void setPlayerId(Long playerId) {
         this.playerId = playerId;
     }
 
-    public Set<String> getApprovers() {
-        return approvers;
+    public Map<Long, String> getReactions() {
+        return reactions;
     }
 
-    public void setApprovers(Set<String> approvers) {
-        this.approvers = approvers;
+    public void setReactions(Map<Long, String> reactions) {
+        this.reactions = reactions;
     }
 }

@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface StopRepository extends JpaRepository<Stop, Long> {
+public interface StopRepository extends JpaRepository<Stop, String> {
 
     Optional<Stop> findById(@Param("id") String id);
 

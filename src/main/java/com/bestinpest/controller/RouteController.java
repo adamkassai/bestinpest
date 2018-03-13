@@ -6,9 +6,11 @@ import com.bestinpest.model.Route;
 import com.bestinpest.repository.JunctionRepository;
 import com.bestinpest.repository.RouteRepository;
 import com.bestinpest.repository.StopRepository;
+import com.bestinpest.service.RouteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -25,6 +27,9 @@ public class RouteController {
     @Autowired
     RouteRepository routeRepository;
 
+    @Autowired
+    RouteService routeService;
+
     @GetMapping("/junctions")
     public List<Junction> junctions() {
         return junctionRepository.findAll();
@@ -33,6 +38,11 @@ public class RouteController {
     @GetMapping("/routes")
     public List<Route> routes() {
         return routeRepository.findAll();
+    }
+
+    @GetMapping("/routes-between")
+    public List<Route> getRoutesBetween(@RequestParam("departure") String departureId, @RequestParam("arrival") String arrivalId) {
+        return routeService.getRoutesBetween(departureId, arrivalId);
     }
 
     @GetMapping("/junctions/{id}")

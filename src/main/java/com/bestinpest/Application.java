@@ -1,7 +1,9 @@
 package com.bestinpest;
 
+import com.bestinpest.model.Game;
 import com.bestinpest.model.Lobby;
 import com.bestinpest.model.Player;
+import com.bestinpest.repository.GameRepository;
 import com.bestinpest.repository.LobbyRepository;
 import com.bestinpest.repository.PlayerRepository;
 import org.slf4j.Logger;
@@ -37,7 +39,7 @@ public class Application {
     }
 
     @Bean
-    public CommandLineRunner demo(LobbyRepository lobbyRepository, PlayerRepository playerRepository) {
+    public CommandLineRunner demo(LobbyRepository lobbyRepository, PlayerRepository playerRepository, GameRepository gameRepository) {
         return (args) -> {
 
             Player player1 = new Player("Adam", "BKK_CSF01108");
@@ -59,6 +61,28 @@ public class Application {
 
             lobbyRepository.save(new Lobby("Elso probajatek"));
             lobbyRepository.save(new Lobby("Ez mar a masodik"));
+
+
+            //
+
+            Player player3 = new Player("Adam", "BKK_CSF01108");
+            Player player4 = new Player("Bobi", "BKK_CS009026");
+            Player player5 = new Player("Maki", "BKK_CS009026");
+            playerRepository.save(player3);
+            playerRepository.save(player4);
+            playerRepository.save(player5);
+
+            Game game = new Game(new Long(1000), player3.getId());
+            game.getPlayers().add(player3);
+            game.getPlayers().add(player4);
+            game.getPlayers().add(player5);
+            gameRepository.save(game);
+            player3.setGame(game);
+            player4.setGame(game);
+            player5.setGame(game);
+            playerRepository.save(player3);
+            playerRepository.save(player4);
+            playerRepository.save(player5);
 
            /* // save a couple of customers
            Lobby(String name, Player leader, int maxPlayerNumber, String password, Player criminal, List<Player> players)

@@ -18,6 +18,11 @@ public class Player {
     @JsonIgnore
     private Lobby lobby;
 
+    @ManyToOne
+    @JoinColumn(name="gameId")
+    @JsonIgnore
+    private Game game;
+
     private String junctionId;
 
     private String name;
@@ -60,5 +65,9 @@ public class Player {
 
     public void setJunctionId(String junctionId) {
         this.junctionId = junctionId;
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
     }
 }

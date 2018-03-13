@@ -23,15 +23,45 @@ public class RouteService {
     @Autowired
     RouteRepository routeRepository;
 
-    public List<Junction> getFreeJunctionsNearby(double lat, double lon, List<Player> players)
+    public List<Route> getRoutesBetween(String departureId, String arrivalId)
     {
+        Optional<Junction> departure = junctionRepository.findById(departureId);
+        Optional<Junction> arrival = junctionRepository.findById(arrivalId);
+        List<Route> routesBetween = new ArrayList<>();
+
+        if (departure.isPresent() && arrival.isPresent()) {
+
+            List<Route> routesByDeparture = new ArrayList<>();
+            List<Route> routesByArrival = new ArrayList<>();
+
+            for (Stop stop: departure.get().getStops())
+            {
+                routesByDeparture.addAll(routeRepository.findByDeparture(stop));
+            }
+
+            for (Stop stop: arrival.get().getStops())
+            {
+                routesByArrival.addAll(routeRepository.findByArrival(stop));
+            }
+
+            for (Route route : routesByDeparture)
+            {
+                if (routesByArrival.contains(route))
+                    routesBetween.add(route);
+            }
+        }
+
+        return routesBetween;
+    }
+
+
+    public List<Junction> getFreeJunctionsNearby(double lat, double lon, List<Player> players) {
         List<Junction> junctions = junctionRepository.findAll();
         List<Junction> reservedJunctions = new ArrayList<>();
         List<Junction> junctionsInOneStepRadius = new ArrayList<>();
         List<Junction> junctionsInTwoStepRadius = new ArrayList<>();
 
-        for (Player player: players)
-        {
+        for (Player player : players) {
 
             Optional<Junction> reservedJunction = junctionRepository.findById(player.getJunctionId());
 
@@ -42,8 +72,7 @@ public class RouteService {
             }
         }
 
-        for (Junction junction: junctionsInOneStepRadius)
-        {
+        for (Junction junction : junctionsInOneStepRadius) {
             junctionsInTwoStepRadius.addAll(getJunctionsFromJunction(junction));
             junctionsInTwoStepRadius.addAll(getJunctionsToJunction(junction));
         }
@@ -55,46 +84,41 @@ public class RouteService {
         return junctions;
     }
 
-    public List<Junction> getJunctionsFromJunction(Junction junction)
-    {
+    public List<Junction> getJunctionsFromJunction(Junction junction) {
         List<Stop> stops = junction.getStops();
         List<Route> routes = new ArrayList<>();
         List<Junction> arrivals = new ArrayList<>();
 
-        for (Stop stop: stops)
-        {
+        for (Stop stop : stops) {
             routes.addAll(routeRepository.findByDeparture(stop));
         }
 
-        for (Route route: routes)
-        {
-            arrivals.add(route.getArrival().getJunction());
+        for (Route route : routes) {
+            if (!arrivals.contains(route.getArrival().getJunction()))
+                arrivals.add(route.getArrival().getJunction());
         }
 
         return arrivals;
     }
 
-    public List<Junction> getJunctionsToJunction(Junction junction)
-    {
+    public List<Junction> getJunctionsToJunction(Junction junction) {
         List<Stop> stops = junction.getStops();
         List<Route> routes = new ArrayList<>();
         List<Junction> departures = new ArrayList<>();
 
-        for (Stop stop: stops)
-        {
+        for (Stop stop : stops) {
             routes.addAll(routeRepository.findByArrival(stop));
         }
 
-        for (Route route: routes)
-        {
-            departures.add(route.getDeparture().getJunction());
+        for (Route route : routes) {
+            if (!departures.contains(route.getDeparture().getJunction()))
+                departures.add(route.getDeparture().getJunction());
         }
 
         return departures;
     }
 
-    public List<Stop> getNearbyStops(Coordinates coords, int radius)
-    {
+    public List<Stop> getNearbyStops(Coordinates coords, int radius) {
         List<Stop> stops = stopRepository.findAll();
         //TODO
         return stops;

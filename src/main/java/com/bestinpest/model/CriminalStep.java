@@ -16,14 +16,16 @@ public class CriminalStep {
     @JsonIgnore
     private Game game;
 
+    private int round;
+
     private String departureJunctionId;
     private String arrivalJunctionId;
-    private String routeId;
+    private Long routeId;
 
     public CriminalStep() {
     }
 
-    public CriminalStep(Game game, String departureJunctionId, String arrivalJunctionId, String routeId) {
+    public CriminalStep(Game game, String departureJunctionId, String arrivalJunctionId, Long routeId) {
         this.game = game;
         this.departureJunctionId = departureJunctionId;
         this.arrivalJunctionId = arrivalJunctionId;
@@ -62,11 +64,19 @@ public class CriminalStep {
         this.arrivalJunctionId = arrivalJunctionId;
     }
 
-    public String getRouteId() {
+    public Long getRouteId() {
         return routeId;
     }
 
-    public void setRouteId(String routeId) {
+    public void setRouteId(Long routeId) {
         this.routeId = routeId;
+    }
+
+    public int getRound() {
+        return round;
+    }
+
+    public void setRound(int round) {
+        this.round = round;
     }
 }

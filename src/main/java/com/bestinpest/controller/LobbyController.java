@@ -1,10 +1,9 @@
 package com.bestinpest.controller;
 
-import com.bestinpest.model.RabbitMessage;
+import com.bestinpest.exception.BadRequestException;
+import com.bestinpest.model.*;
 import com.bestinpest.exception.NotFoundException;
-import com.bestinpest.model.Junction;
-import com.bestinpest.model.Lobby;
-import com.bestinpest.model.Player;
+import com.bestinpest.repository.GameRepository;
 import com.bestinpest.repository.JunctionRepository;
 import com.bestinpest.repository.LobbyRepository;
 import com.bestinpest.repository.PlayerRepository;
@@ -30,15 +29,13 @@ public class LobbyController {
     PlayerRepository playerRepository;
 
     @Autowired
-    JunctionRepository junctionRepository;
+    GameRepository gameRepository;
 
     @Autowired
     RabbitTemplate rabbitTemplate;
 
     @Autowired
     RouteService routeService;
-
-    JSONWriter jsonWriter = new JSONWriter();
 
     @GetMapping("/lobbies")
     public List<Lobby> lobbies() {
@@ -69,6 +66,11 @@ public class LobbyController {
         Lobby lobby = lobbyRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
 
+        if (lobby.getPlayers().size()>=lobby.getMaxPlayerNumber())
+        {
+            throw new BadRequestException("Lobby has reached the maximum player number.");
+        }
+
         playerRepository.save(player);
         lobby.getPlayers().add(player);
 
@@ -86,6 +88,30 @@ public class LobbyController {
                 .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
 
         return routeService.getFreeJunctionsNearby(lat, lon, lobby.getPlayers());
+    }
+
+    @GetMapping("/lobbies/{id}/start-game")
+    public Game startGame(@PathVariable(value = "id") Long id) {
+
+        Lobby lobby = lobbyRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
+
+        Game game = new Game(lobby.getId(), lobby.getCriminalId());
+        gameRepository.save(game);
+
+        List<Player> players = lobby.getPlayers();
+
+        for (Player player : players)
+        {
+            player.setLobby(null);
+            player.setGame(game);
+            playerRepository.save(player);
+            game.getPlayers().add(player);
+        }
+        lobby.setPlayers(new ArrayList<>());
+        lobbyRepository.save(lobby);
+        lobbyRepository.delete(lobby);
+        return gameRepository.save(game);
     }
 
     @GetMapping("/lobbies/available-junctions")

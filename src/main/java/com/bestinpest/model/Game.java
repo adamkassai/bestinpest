@@ -2,35 +2,43 @@ package com.bestinpest.model;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 public class Game {
 
     @Id
-    @GeneratedValue
     private Long id;
 
-    @ManyToOne
+    /*@ManyToOne
     @JoinColumn(name="criminalId")
-    private Player criminal;
+    private Player criminal;*/
 
-    @OneToMany(mappedBy="lobby")
+    private Long criminalId;
+
+    private String turn;
+
+    private int round;
+
+    @OneToMany(mappedBy="game")
     private List<Player> players = new ArrayList<>();
 
-    @OneToMany(mappedBy="game")
+    @OneToMany(mappedBy="game", cascade = CascadeType.ALL)
     private List<CriminalStep> criminalSteps = new ArrayList<>();
 
-    @OneToMany(mappedBy="game")
+    @OneToMany(mappedBy="game", cascade = CascadeType.ALL)
     private List<DetectiveStep> detectiveSteps = new ArrayList<>();
 
     public Game() {
     }
 
-    public Game(Long id, Player criminal, List<Player> players) {
+    public Game(Long id, Long criminalId) {
         this.id = id;
-        this.criminal = criminal;
-        this.players = players;
+        this.criminalId = criminalId;
+        this.turn="criminal";
+        this.round=1;
     }
 
     public Long getId() {
@@ -41,12 +49,12 @@ public class Game {
         this.id = id;
     }
 
-    public Player getCriminal() {
-        return criminal;
+    public Long getCriminalId() {
+        return criminalId;
     }
 
-    public void setCriminal(Player criminal) {
-        this.criminal = criminal;
+    public void setCriminalId(Long criminalId) {
+        this.criminalId = criminalId;
     }
 
     public List<Player> getPlayers() {
@@ -71,5 +79,31 @@ public class Game {
 
     public void setDetectiveSteps(List<DetectiveStep> detectiveSteps) {
         this.detectiveSteps = detectiveSteps;
+    }
+
+    public String getTurn() {
+        return turn;
+    }
+
+    public void setTurn(String turn) {
+        this.turn = turn;
+    }
+
+    public int getRound() {
+        return round;
+    }
+
+    public void setRound(int round) {
+        this.round = round;
+    }
+
+    public DetectiveStep getDetectiveStepByRound(int round)
+    {
+        for (DetectiveStep step : detectiveSteps)
+        {
+            if (step.getRound()==round)
+                return step;
+        }
+        return new DetectiveStep();
     }
 }
