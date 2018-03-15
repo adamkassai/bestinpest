@@ -39,9 +39,6 @@ public class LobbyController {
 
     @GetMapping("/lobbies")
     public List<Lobby> lobbies() {
-
-        RabbitMessage m = new RabbitMessage("Proba uzenet", "lobbies", lobbyRepository.findAll());
-        rabbitTemplate.convertAndSend("bip-exchange", "", m.toString());
         return lobbyRepository.findAll();
     }
 
@@ -56,8 +53,13 @@ public class LobbyController {
             lobby.getPlayers().add(leader);
             leader.setLobby(lobby);
             playerRepository.save(leader);
+            lobby = lobbyRepository.save(lobby);
+
+            RabbitMessage m = new RabbitMessage(lobby.getName()+" is added to the lobbies.", "lobby-added", lobbyRepository.findAll());
+            rabbitTemplate.convertAndSend("bip-exchange", "lobbies", m.toString());
+
         }
-        return lobbyRepository.save(lobby);
+        return lobby;
     }
 
     @PostMapping("/lobbies/{id}/join")
@@ -77,7 +79,12 @@ public class LobbyController {
         player.setLobby(lobby);
         playerRepository.save(player);
 
-        return lobbyRepository.save(lobby);
+        lobby = lobbyRepository.save(lobby);
+
+        RabbitMessage m = new RabbitMessage(player.getName()+" joined the lobby.", "player-joined", lobby);
+        rabbitTemplate.convertAndSend("bip-exchange", "lobby:"+lobby.getId(), m.toString());
+
+        return lobby;
     }
 
 
@@ -90,7 +97,7 @@ public class LobbyController {
         return routeService.getFreeJunctionsNearby(lat, lon, lobby.getPlayers());
     }
 
-    @GetMapping("/lobbies/{id}/start-game")
+    @PostMapping("/lobbies/{id}/start-game")
     public Game startGame(@PathVariable(value = "id") Long id) {
 
         Lobby lobby = lobbyRepository.findById(id)
@@ -109,9 +116,15 @@ public class LobbyController {
             game.getPlayers().add(player);
         }
         lobby.setPlayers(new ArrayList<>());
+
+        game = gameRepository.save(game);
+
+        RabbitMessage m = new RabbitMessage("Lobby is ready to play the game.", "game-started", game);
+        rabbitTemplate.convertAndSend("bip-exchange", "lobby:"+lobby.getId(), m.toString());
+
         lobbyRepository.save(lobby);
         lobbyRepository.delete(lobby);
-        return gameRepository.save(game);
+        return game;
     }
 
     @GetMapping("/lobbies/available-junctions")
@@ -151,6 +164,10 @@ public class LobbyController {
         playerRepository.save(existingPlayer);
 
         lobby.setCriminalId(existingPlayer.getId());
+
+        RabbitMessage m = new RabbitMessage(existingPlayer.getName()+" is the new criminal.", "criminal-changed", lobby);
+        rabbitTemplate.convertAndSend("bip-exchange", "lobby:"+lobby.getId(), m.toString());
+
         return lobbyRepository.save(lobby);
     }
 
@@ -173,6 +190,10 @@ public class LobbyController {
         existingLobby.setLeader(null);
         lobbyRepository.save(existingLobby);
         playerRepository.delete(existingLobby.getPlayers());
+
+        RabbitMessage m = new RabbitMessage("Lobby is deleted.", "lobby-deleted", existingLobby);
+        rabbitTemplate.convertAndSend("bip-exchange", "lobby:"+existingLobby.getId(), m.toString());
+
         lobbyRepository.delete(existingLobby);
         return ResponseEntity.ok().build();
     }
@@ -193,8 +214,13 @@ public class LobbyController {
         }
         Lobby existingLobby = lobby.get();
         existingLobby.getPlayers().remove(player);
-        lobbyRepository.save(existingLobby);
+
+        existingLobby = lobbyRepository.save(existingLobby);
         playerRepository.delete(player.get());
+
+        RabbitMessage m = new RabbitMessage(player.get().getName()+" is removed from the lobby.", "player-removed", existingLobby);
+        rabbitTemplate.convertAndSend("bip-exchange", "lobby:"+existingLobby.getId(), m.toString());
+
         return ResponseEntity.ok().build();
     }
 

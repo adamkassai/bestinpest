@@ -7,7 +7,6 @@ import com.bestinpest.repository.CriminalStepRepository;
 import com.bestinpest.repository.DetectiveStepRepository;
 import com.bestinpest.repository.GameRepository;
 import com.bestinpest.repository.PlayerRepository;
-import jdk.internal.dynalink.linker.LinkerServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +110,6 @@ public class GameService {
             }
         }
         return true;
-
     }
 
     public boolean isCriminalCaught(Game game) {
@@ -128,7 +126,7 @@ public class GameService {
         return false;
     }
 
-    public void continueGameIfApproved(Game game) {
+    public void evaluateRound(Game game) {
 
         if (!isAllPlanApproved(game))
             return;

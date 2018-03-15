@@ -130,7 +130,7 @@ public class GameController {
 
         plan.getReactions().put(playerId, reaction);
         plan = planRepository.save(plan);
-        gameService.continueGameIfApproved(game);
+        gameService.evaluateRound(game);
         return plan;
     }
 
