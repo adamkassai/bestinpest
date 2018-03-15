@@ -24,8 +24,8 @@ public class Player {
     private Game game;
 
     private String junctionId;
-
     private String name;
+    private Boolean ready;
 
     public Player() {
     }
@@ -37,6 +37,7 @@ public class Player {
     public Player(String name, String junctionId) {
         this.junctionId = junctionId;
         this.name = name;
+        this.ready=false;
     }
 
     public Long getId() {
@@ -69,5 +70,13 @@ public class Player {
 
     public void setGame(Game game) {
         this.game = game;
+    }
+
+    public Boolean getReady() {
+        return ready;
+    }
+
+    public void setReady(Boolean ready) {
+        this.ready = ready;
     }
 }

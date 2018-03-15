@@ -1,6 +1,7 @@
 package com.bestinpest.service;
 
 import com.bestinpest.Application;
+import com.bestinpest.exception.BadRequestException;
 import com.bestinpest.exception.NotFoundException;
 import com.bestinpest.model.*;
 import com.bestinpest.repository.CriminalStepRepository;
@@ -124,6 +125,28 @@ public class GameService {
 
         }
         return false;
+    }
+
+    public Game addCriminalStep(Game game, CriminalStep step) {
+
+        if (!game.getTurn().equals("criminal"))
+        {
+            throw new BadRequestException("It's not your turn.");
+        }
+
+        Player player = playerRepository.findById(game.getCriminalId())
+                .orElseThrow(() -> new NotFoundException("Player", "id", game.getCriminalId()));
+
+
+        step.setGame(game);
+        step.setRound(game.getRound());
+        criminalStepRepository.save(step);
+        game.getCriminalSteps().add(step);
+        player.setJunctionId(step.getArrivalJunctionId());
+        playerRepository.save(player);
+        changeTurn(game);
+        return gameRepository.save(game);
+
     }
 
     public void evaluateRound(Game game) {

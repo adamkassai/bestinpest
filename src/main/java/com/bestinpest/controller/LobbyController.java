@@ -4,11 +4,9 @@ import com.bestinpest.exception.BadRequestException;
 import com.bestinpest.model.*;
 import com.bestinpest.exception.NotFoundException;
 import com.bestinpest.repository.GameRepository;
-import com.bestinpest.repository.JunctionRepository;
 import com.bestinpest.repository.LobbyRepository;
 import com.bestinpest.repository.PlayerRepository;
 import com.bestinpest.service.RouteService;
-import com.rabbitmq.tools.json.JSONWriter;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -45,20 +43,22 @@ public class LobbyController {
     @PostMapping("/lobbies")
     public Lobby createLobby(@Valid @RequestBody Lobby lobby) {
 
-        if (lobby.getLeader()!=null) {
-            Player leader = lobby.getLeader();
-            playerRepository.save(leader);
-            lobbyRepository.save(lobby);
-
-            lobby.getPlayers().add(leader);
-            leader.setLobby(lobby);
-            playerRepository.save(leader);
-            lobby = lobbyRepository.save(lobby);
-
-            RabbitMessage m = new RabbitMessage(lobby.getName()+" is added to the lobbies.", "lobby-added", lobbyRepository.findAll());
-            rabbitTemplate.convertAndSend("bip-exchange", "lobbies", m.toString());
-
+        if (lobby.getLeader() == null) {
+            throw new BadRequestException("Lobby must have a leader.");
         }
+
+        Player leader = lobby.getLeader();
+        playerRepository.save(leader);
+        lobbyRepository.save(lobby);
+
+        lobby.getPlayers().add(leader);
+        leader.setLobby(lobby);
+        playerRepository.save(leader);
+        lobby = lobbyRepository.save(lobby);
+
+        RabbitMessage m = new RabbitMessage(lobby.getName() + " is added to the lobbies.", "lobby-added", lobbyRepository.findAll());
+        rabbitTemplate.convertAndSend("bip-exchange", "lobbies", m.toString());
+
         return lobby;
     }
 
@@ -68,8 +68,7 @@ public class LobbyController {
         Lobby lobby = lobbyRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
 
-        if (lobby.getPlayers().size()>=lobby.getMaxPlayerNumber())
-        {
+        if (lobby.getPlayers().size() >= lobby.getMaxPlayerNumber()) {
             throw new BadRequestException("Lobby has reached the maximum player number.");
         }
 
@@ -81,8 +80,8 @@ public class LobbyController {
 
         lobby = lobbyRepository.save(lobby);
 
-        RabbitMessage m = new RabbitMessage(player.getName()+" joined the lobby.", "player-joined", lobby);
-        rabbitTemplate.convertAndSend("bip-exchange", "lobby:"+lobby.getId(), m.toString());
+        RabbitMessage m = new RabbitMessage(player.getName() + " joined the lobby.", "player-joined", lobby);
+        rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + lobby.getId(), m.toString());
 
         return lobby;
     }
@@ -108,8 +107,7 @@ public class LobbyController {
 
         List<Player> players = lobby.getPlayers();
 
-        for (Player player : players)
-        {
+        for (Player player : players) {
             player.setLobby(null);
             player.setGame(game);
             playerRepository.save(player);
@@ -120,7 +118,7 @@ public class LobbyController {
         game = gameRepository.save(game);
 
         RabbitMessage m = new RabbitMessage("Lobby is ready to play the game.", "game-started", game);
-        rabbitTemplate.convertAndSend("bip-exchange", "lobby:"+lobby.getId(), m.toString());
+        rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + lobby.getId(), m.toString());
 
         lobbyRepository.save(lobby);
         lobbyRepository.delete(lobby);
@@ -139,8 +137,7 @@ public class LobbyController {
         Lobby lobby = lobbyRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
 
-        if (!lobby.isValidPassword(password))
-        {
+        if (!lobby.isValidPassword(password)) {
             return ResponseEntity.status(401).build();
         }
 
@@ -156,8 +153,7 @@ public class LobbyController {
         Player existingPlayer = playerRepository.findById(player.getId())
                 .orElseThrow(() -> new NotFoundException("Player", "id", player.getId()));
 
-        if (!lobby.getPlayers().contains(existingPlayer))
-        {
+        if (!lobby.getPlayers().contains(existingPlayer)) {
             throw new NotFoundException("Lobby", "player", player);
         }
 
@@ -165,8 +161,8 @@ public class LobbyController {
 
         lobby.setCriminalId(existingPlayer.getId());
 
-        RabbitMessage m = new RabbitMessage(existingPlayer.getName()+" is the new criminal.", "criminal-changed", lobby);
-        rabbitTemplate.convertAndSend("bip-exchange", "lobby:"+lobby.getId(), m.toString());
+        RabbitMessage m = new RabbitMessage(existingPlayer.getName() + " is the new criminal.", "criminal-changed", lobby);
+        rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + lobby.getId(), m.toString());
 
         return lobbyRepository.save(lobby);
     }
@@ -192,7 +188,7 @@ public class LobbyController {
         playerRepository.delete(existingLobby.getPlayers());
 
         RabbitMessage m = new RabbitMessage("Lobby is deleted.", "lobby-deleted", existingLobby);
-        rabbitTemplate.convertAndSend("bip-exchange", "lobby:"+existingLobby.getId(), m.toString());
+        rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + existingLobby.getId(), m.toString());
 
         lobbyRepository.delete(existingLobby);
         return ResponseEntity.ok().build();
@@ -218,11 +214,32 @@ public class LobbyController {
         existingLobby = lobbyRepository.save(existingLobby);
         playerRepository.delete(player.get());
 
-        RabbitMessage m = new RabbitMessage(player.get().getName()+" is removed from the lobby.", "player-removed", existingLobby);
-        rabbitTemplate.convertAndSend("bip-exchange", "lobby:"+existingLobby.getId(), m.toString());
+        RabbitMessage m = new RabbitMessage(player.get().getName() + " is removed from the lobby.", "player-removed", existingLobby);
+        rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + existingLobby.getId(), m.toString());
 
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/lobbies/{id}/players/{playerId}/ready")
+    public Player setPlayerReady(@PathVariable(value = "id") Long id, @PathVariable(value = "playerId") Long playerId) {
+
+        Lobby lobby = lobbyRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
+
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new NotFoundException("Player", "id", playerId));
+
+        if (player.getReady()) {
+            player.setReady(false);
+        } else {
+            player.setReady(true);
+        }
+        player = playerRepository.save(player);
+
+        RabbitMessage m = new RabbitMessage(player.getName() + " is ready to play.", "player-ready", lobby);
+        rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + lobby.getId(), m.toString());
+
+        return player;
+    }
 
 }

@@ -21,6 +21,7 @@ public class CriminalStep {
     private String departureJunctionId;
     private String arrivalJunctionId;
     private Long routeId;
+    private Boolean visible;
 
     public CriminalStep() {
     }
@@ -30,6 +31,7 @@ public class CriminalStep {
         this.departureJunctionId = departureJunctionId;
         this.arrivalJunctionId = arrivalJunctionId;
         this.routeId = routeId;
+        this.visible=false;
     }
 
     public Long getId() {
@@ -78,5 +80,13 @@ public class CriminalStep {
 
     public void setRound(int round) {
         this.round = round;
+    }
+
+    public Boolean getVisible() {
+        return visible;
+    }
+
+    public void setVisible(Boolean visible) {
+        this.visible = visible;
     }
 }

@@ -33,9 +33,6 @@ public class GameController {
     RouteService routeService;
 
     @Autowired
-    CriminalStepRepository criminalStepRepository;
-
-    @Autowired
     DetectiveStepRepository detectiveStepRepository;
 
     @Autowired
@@ -49,14 +46,6 @@ public class GameController {
         return gameRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Game", "id", id));
     }
-
-    /*@GetMapping("/games/{id}/approved")
-    public Boolean isApproved(@PathVariable(value = "id") Long id) {
-        Game game = gameRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Game", "id", id));
-
-        return gameService.isAllPlanApproved(game);
-    }*/
 
     @GetMapping("/players/{id}/available-junctions")
     public List<Junction> getAvailableJunctions(@PathVariable(value = "id") Long id) {
@@ -77,23 +66,7 @@ public class GameController {
         Game game = gameRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Game", "id", id));
 
-        if (!game.getTurn().equals("criminal"))
-        {
-            throw new BadRequestException("It's not your turn.");
-        }
-
-        Player player = playerRepository.findById(game.getCriminalId())
-                .orElseThrow(() -> new NotFoundException("Player", "id", id));
-
-
-        step.setGame(game);
-        step.setRound(game.getRound());
-        criminalStepRepository.save(step);
-        game.getCriminalSteps().add(step);
-        player.setJunctionId(step.getArrivalJunctionId());
-        playerRepository.save(player);
-        gameService.changeTurn(game);
-        return gameRepository.save(game);
+        return gameService.addCriminalStep(game, step);
     }
 
     @PostMapping("/games/{id}/detective-plan")
