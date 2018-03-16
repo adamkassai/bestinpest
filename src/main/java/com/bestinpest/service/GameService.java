@@ -1,15 +1,14 @@
 package com.bestinpest.service;
 
 import com.bestinpest.Application;
+import com.bestinpest.config.GameConfig;
 import com.bestinpest.exception.BadRequestException;
 import com.bestinpest.exception.NotFoundException;
 import com.bestinpest.model.*;
-import com.bestinpest.repository.CriminalStepRepository;
-import com.bestinpest.repository.DetectiveStepRepository;
-import com.bestinpest.repository.GameRepository;
-import com.bestinpest.repository.PlayerRepository;
+import com.bestinpest.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +28,19 @@ public class GameService {
     PlayerRepository playerRepository;
 
     @Autowired
+    RabbitTemplate rabbitTemplate;
+
+    @Autowired
     GameRepository gameRepository;
+
+    @Autowired
+    PlanRepository planRepository;
+
+    @Autowired
+    RouteRepository routeRepository;
+
+    @Autowired
+    GameConfig gameConfig;
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
@@ -40,11 +51,23 @@ public class GameService {
             detectiveStep.setRound(game.getRound());
             detectiveStepRepository.save(detectiveStep);
             game.getDetectiveSteps().add(detectiveStep);
-        }else{
+            game = gameRepository.save(game);
+
+            RabbitMessage m = new RabbitMessage("Detectives' turn.", "turn-changed", game);
+            rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
+
+        }if (game.getRound()<gameConfig.getMaxRoundNumber()){
             game.setTurn("criminal");
             game.setRound(game.getRound()+1);
+            game = gameRepository.save(game);
+
+            RabbitMessage m = new RabbitMessage("Criminal's turn.", "turn-changed", game);
+            rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
+        }else{
+            RabbitMessage m = new RabbitMessage("Criminal is not caught, the game ended.", "game-ended", game);
+            rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
         }
-        gameRepository.save(game);
+
     }
 
     public boolean isAllPlanApproved(Game game) {
@@ -74,6 +97,10 @@ public class GameService {
                 }
             }
         }
+
+        RabbitMessage m = new RabbitMessage("Plan is approved by everyone.", "plan-approved", game);
+        rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
+
         return true;
     }
 
@@ -86,10 +113,22 @@ public class GameService {
             {
                 if (!player.getId().equals(game.getCriminalId())) {
 
-                    player.setJunctionId(step.getPlans().get(player.getId()).getArrivalJunctionId());
+                    Plan plan = step.getPlans().get(player.getId());
+
+                    player.setJunctionId(plan.getArrivalJunctionId());
+                    player.setReady(false);
+
+                    Route route = routeRepository.findById(plan.getRouteId())
+                            .orElseThrow(() -> new NotFoundException("Route", "id", plan.getRouteId()));
+
+                    player.getTickets().put(getTicketType(route.getType()), player.getTickets().get(getTicketType(route.getType()))-1);
+
                     playerRepository.save(player);
                 }
             }
+
+            RabbitMessage m = new RabbitMessage("Detectives took a step.", "detectives-step", game);
+            rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
 
         }
 
@@ -127,6 +166,45 @@ public class GameService {
         return false;
     }
 
+    public String getTicketType(String type) {
+
+        if (type.equals("BUS") || type.equals("TROLLEYBUS")) {
+            return "BUS-TROLLEY";
+        }
+
+        return type;
+    }
+
+    public Game addDetectivePlan(Game game, Plan plan) {
+
+        if (!game.getTurn().equals("detectives"))
+        {
+            throw new BadRequestException("It's not your turn.");
+        }
+
+        Player player = playerRepository.findById(plan.getPlayerId())
+                .orElseThrow(() -> new NotFoundException("Player", "id", plan.getPlayerId()));
+
+        Route route = routeRepository.findById(plan.getRouteId())
+                .orElseThrow(() -> new NotFoundException("Route", "id", plan.getRouteId()));
+
+        if (player.getTickets().get(getTicketType(route.getType()))==0) {
+            throw new BadRequestException("You don't have ticket for this route.");
+        }
+
+        planRepository.save(plan);
+        DetectiveStep step = game.getDetectiveStepByRound(game.getRound());
+        step.getPlans().put(player.getId(), plan);
+        detectiveStepRepository.save(step);
+
+        game = gameRepository.save(game);
+
+        RabbitMessage m = new RabbitMessage(player.getName()+" made a plan.", "detective-plan", game);
+        rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
+
+        return game;
+    }
+
     public Game addCriminalStep(Game game, CriminalStep step) {
 
         if (!game.getTurn().equals("criminal"))
@@ -137,12 +215,20 @@ public class GameService {
         Player player = playerRepository.findById(game.getCriminalId())
                 .orElseThrow(() -> new NotFoundException("Player", "id", game.getCriminalId()));
 
+        Route route = routeRepository.findById(step.getRouteId())
+                .orElseThrow(() -> new NotFoundException("Route", "id", step.getRouteId()));
+
+        if (step.getType()==null) {
+            step.setType(route.getType());
+        }
 
         step.setGame(game);
         step.setRound(game.getRound());
+        if (gameConfig.getVisibleCriminalRounds().contains(step.getRound())) { step.setVisible(true); }
         criminalStepRepository.save(step);
         game.getCriminalSteps().add(step);
         player.setJunctionId(step.getArrivalJunctionId());
+        player.setReady(false);
         playerRepository.save(player);
         changeTurn(game);
         return gameRepository.save(game);
@@ -156,7 +242,8 @@ public class GameService {
 
         if (!isValidStep(game))
         {
-            //Send message
+            RabbitMessage m = new RabbitMessage("People can't step to the same junction.", "invalid-step", game);
+            rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
             return;
         }
 
@@ -164,13 +251,13 @@ public class GameService {
 
         if (isCriminalCaught(game))
         {
-            //Send message
+            RabbitMessage m = new RabbitMessage("Criminal is caught.", "criminal-caught", game);
+            rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
             //End game
             return;
         }
 
         changeTurn(game);
-        //Check if game hasn't finished
     }
 
 }

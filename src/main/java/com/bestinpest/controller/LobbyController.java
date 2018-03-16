@@ -1,5 +1,6 @@
 package com.bestinpest.controller;
 
+import com.bestinpest.config.GameConfig;
 import com.bestinpest.exception.BadRequestException;
 import com.bestinpest.model.*;
 import com.bestinpest.exception.NotFoundException;
@@ -28,6 +29,9 @@ public class LobbyController {
 
     @Autowired
     GameRepository gameRepository;
+
+    @Autowired
+    GameConfig gameConfig;
 
     @Autowired
     RabbitTemplate rabbitTemplate;
@@ -110,6 +114,7 @@ public class LobbyController {
         for (Player player : players) {
             player.setLobby(null);
             player.setGame(game);
+            player.setTickets(gameConfig.getTickets());
             playerRepository.save(player);
             game.getPlayers().add(player);
         }

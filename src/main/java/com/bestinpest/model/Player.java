@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 public class Player {
@@ -26,6 +28,10 @@ public class Player {
     private String junctionId;
     private String name;
     private Boolean ready;
+
+    @ElementCollection
+    @MapKeyColumn(name="ticket")
+    private Map<String, Integer> tickets = new HashMap<>();
 
     public Player() {
     }
@@ -78,5 +84,13 @@ public class Player {
 
     public void setReady(Boolean ready) {
         this.ready = ready;
+    }
+
+    public Map<String, Integer> getTickets() {
+        return tickets;
+    }
+
+    public void setTickets(Map<String, Integer> tickets) {
+        this.tickets = tickets;
     }
 }

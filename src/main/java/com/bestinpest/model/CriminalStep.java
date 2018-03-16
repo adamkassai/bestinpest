@@ -22,6 +22,7 @@ public class CriminalStep {
     private String arrivalJunctionId;
     private Long routeId;
     private Boolean visible;
+    private String type;
 
     public CriminalStep() {
     }
@@ -88,5 +89,13 @@ public class CriminalStep {
 
     public void setVisible(Boolean visible) {
         this.visible = visible;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

@@ -106,6 +106,6 @@ public class Lobby {
         if (this.password==null)
             return true;
 
-        return (this.password == password);
+        return (this.password.equals(password));
     }
 }

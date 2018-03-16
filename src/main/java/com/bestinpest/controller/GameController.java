@@ -66,7 +66,12 @@ public class GameController {
         Game game = gameRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Game", "id", id));
 
-        return gameService.addCriminalStep(game, step);
+        game = gameService.addCriminalStep(game, step);
+
+        RabbitMessage m = new RabbitMessage("Criminal took a step.", "criminal-step", game);
+        rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
+
+        return game;
     }
 
     @PostMapping("/games/{id}/detective-plan")
@@ -75,22 +80,10 @@ public class GameController {
         Game game = gameRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Game", "id", id));
 
-        if (!game.getTurn().equals("detectives"))
-        {
-            throw new BadRequestException("It's not your turn.");
-        }
-
-        Player player = playerRepository.findById(plan.getPlayerId())
-                .orElseThrow(() -> new NotFoundException("Player", "id", id));
-
-        planRepository.save(plan);
-        DetectiveStep step = game.getDetectiveStepByRound(game.getRound());
-        step.getPlans().put(player.getId(), plan);
-        detectiveStepRepository.save(step);
-        return gameRepository.save(game);
+        return gameService.addDetectivePlan(game, plan);
     }
 
-    @GetMapping("/games/{id}/plans/{planId}/react")
+    @PostMapping("/games/{id}/plans/{planId}/react")
     public Plan approvePlan(@PathVariable(value = "id") Long id, @PathVariable(value = "planId") Long planId, @RequestParam("playerId") Long playerId,
                             @ApiParam(value = "approve or refuse", required = true)
                             @RequestParam("reaction") String reaction) {
@@ -103,8 +96,34 @@ public class GameController {
 
         plan.getReactions().put(playerId, reaction);
         plan = planRepository.save(plan);
+
+        RabbitMessage m = new RabbitMessage(playerId+" reacted to a plan.", "plan-reaction", game);
+        rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
+
         gameService.evaluateRound(game);
         return plan;
+    }
+
+    @PostMapping("/games/{id}/players/{playerId}/ready")
+    public Player setPlayerReady(@PathVariable(value = "id") Long id, @PathVariable(value = "playerId") Long playerId) {
+
+        Game game = gameRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Game", "id", id));
+
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new NotFoundException("Player", "id", playerId));
+
+        if (player.getReady()) {
+            player.setReady(false);
+        } else {
+            player.setReady(true);
+        }
+        player = playerRepository.save(player);
+
+        RabbitMessage m = new RabbitMessage(player.getName() + " has reached his new junction.", "player-ready", game);
+        rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
+
+        return player;
     }
 
 }
