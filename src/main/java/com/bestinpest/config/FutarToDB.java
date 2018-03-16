@@ -34,11 +34,14 @@ public class FutarToDB implements CommandLineRunner {
     @Autowired
     RestTemplate restTemplate;
 
+    @Autowired
+    GameConfig gameConfig;
+
     @Override
     public void run(String... args) throws Exception {
 
         String response = restTemplate.getForObject(
-                "http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/stops-for-location.json?lat=47.497638&lon=19.053021&radius=1000", String.class);
+                "http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/stops-for-location.json?lat=47.497638&lon=19.053021&radius="+gameConfig.getCityRadius(), String.class);
 
         JsonParser parser = new JsonParser();
         JsonArray stopsArray = parser.parse(response).getAsJsonObject().getAsJsonObject("data").getAsJsonArray("list");

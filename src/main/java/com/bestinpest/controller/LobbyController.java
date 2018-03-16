@@ -137,7 +137,7 @@ public class LobbyController {
     }
 
     @PostMapping("/lobbies/{id}/join/auth")
-    public ResponseEntity<?> authToLobby(@PathVariable(value = "id") Long id, @RequestBody String password) {
+    public ResponseEntity<?> ToLobby(@PathVariable(value = "id") Long id, @RequestBody String password) {
 
         Lobby lobby = lobbyRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Lobby", "id", id));

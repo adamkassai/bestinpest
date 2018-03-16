@@ -21,7 +21,7 @@ public class CriminalStep {
     private String departureJunctionId;
     private String arrivalJunctionId;
     private Long routeId;
-    private Boolean visible;
+    private Boolean visible=false;
     private String type;
 
     public CriminalStep() {

@@ -66,12 +66,7 @@ public class GameController {
         Game game = gameRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Game", "id", id));
 
-        game = gameService.addCriminalStep(game, step);
-
-        RabbitMessage m = new RabbitMessage("Criminal took a step.", "criminal-step", game);
-        rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
-
-        return game;
+        return gameService.addCriminalStep(game, step);
     }
 
     @PostMapping("/games/{id}/detective-plan")

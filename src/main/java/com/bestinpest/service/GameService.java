@@ -56,7 +56,7 @@ public class GameService {
             RabbitMessage m = new RabbitMessage("Detectives' turn.", "turn-changed", game);
             rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
 
-        }if (game.getRound()<gameConfig.getMaxRoundNumber()){
+        }else if (game.getRound()<gameConfig.getMaxRoundNumber()){
             game.setTurn("criminal");
             game.setRound(game.getRound()+1);
             game = gameRepository.save(game);
@@ -64,6 +64,8 @@ public class GameService {
             RabbitMessage m = new RabbitMessage("Criminal's turn.", "turn-changed", game);
             rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
         }else{
+            game.setTurn("Criminal won");
+            gameRepository.save(game);
             RabbitMessage m = new RabbitMessage("Criminal is not caught, the game ended.", "game-ended", game);
             rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
         }
@@ -97,9 +99,6 @@ public class GameService {
                 }
             }
         }
-
-        RabbitMessage m = new RabbitMessage("Plan is approved by everyone.", "plan-approved", game);
-        rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
 
         return true;
     }
@@ -230,6 +229,10 @@ public class GameService {
         player.setJunctionId(step.getArrivalJunctionId());
         player.setReady(false);
         playerRepository.save(player);
+
+        RabbitMessage m = new RabbitMessage("Criminal took a step.", "criminal-step", game);
+        rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
+
         changeTurn(game);
         return gameRepository.save(game);
 
@@ -237,8 +240,12 @@ public class GameService {
 
     public void evaluateRound(Game game) {
 
-        if (!isAllPlanApproved(game))
+        if (isAllPlanApproved(game)) {
+            RabbitMessage m = new RabbitMessage("Plan is approved by everyone.", "plan-approved", game);
+            rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
+        }else {
             return;
+        }
 
         if (!isValidStep(game))
         {
@@ -251,6 +258,8 @@ public class GameService {
 
         if (isCriminalCaught(game))
         {
+            game.setTurn("Detectives won");
+            gameRepository.save(game);
             RabbitMessage m = new RabbitMessage("Criminal is caught.", "criminal-caught", game);
             rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
             //End game

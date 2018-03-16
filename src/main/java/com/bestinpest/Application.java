@@ -1,5 +1,6 @@
 package com.bestinpest;
 
+import com.bestinpest.config.GameConfig;
 import com.bestinpest.model.Game;
 import com.bestinpest.model.Lobby;
 import com.bestinpest.model.Player;
@@ -39,7 +40,7 @@ public class Application {
     }
 
     @Bean
-    public CommandLineRunner demo(LobbyRepository lobbyRepository, PlayerRepository playerRepository, GameRepository gameRepository) {
+    public CommandLineRunner demo(LobbyRepository lobbyRepository, PlayerRepository playerRepository, GameRepository gameRepository, GameConfig gameConfig) {
         return (args) -> {
 
             Player player1 = new Player("Adam", "BKK_CSF01108");
@@ -80,6 +81,9 @@ public class Application {
             player3.setGame(game);
             player4.setGame(game);
             player5.setGame(game);
+            player3.setTickets(gameConfig.getTickets());
+            player4.setTickets(gameConfig.getTickets());
+            player5.setTickets(gameConfig.getTickets());
             playerRepository.save(player3);
             playerRepository.save(player4);
             playerRepository.save(player5);
