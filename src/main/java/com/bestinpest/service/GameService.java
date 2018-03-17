@@ -37,6 +37,9 @@ public class GameService {
     PlanRepository planRepository;
 
     @Autowired
+    RecommendationRepository recommendationRepository;
+
+    @Autowired
     RouteRepository routeRepository;
 
     @Autowired
@@ -199,6 +202,25 @@ public class GameService {
         game = gameRepository.save(game);
 
         RabbitMessage m = new RabbitMessage(player.getName()+" made a plan.", "detective-plan", game);
+        rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
+
+        return game;
+    }
+
+    public Game addRecommendation(Game game, Recommendation recommendation) {
+
+        Player player = playerRepository.findById(recommendation.getSenderPlayerId())
+                .orElseThrow(() -> new NotFoundException("Player", "id", recommendation.getSenderPlayerId()));
+
+
+        DetectiveStep step = game.getDetectiveStepByRound(game.getRound());
+        recommendation.setStep(step);
+        recommendationRepository.save(recommendation);
+        step.getRecommendations().add(recommendation);
+        detectiveStepRepository.save(step);
+        game = gameRepository.save(game);
+
+        RabbitMessage m = new RabbitMessage(player.getName()+" sent a recommendation", "recommendation-sent", game);
         rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
 
         return game;

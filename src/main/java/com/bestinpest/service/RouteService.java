@@ -118,7 +118,7 @@ public class RouteService {
         return departures;
     }
 
-    public List<Stop> getNearbyStops(Coordinates coords, int radius) {
+    public List<Stop> getNearbyStops(Double lat, Double lon, int radius) {
         List<Stop> stops = stopRepository.findAll();
         //TODO
         return stops;

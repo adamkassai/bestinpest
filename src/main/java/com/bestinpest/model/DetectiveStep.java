@@ -3,7 +3,9 @@ package com.bestinpest.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Entity
@@ -23,6 +25,9 @@ public class DetectiveStep {
     @ElementCollection
     @MapKeyColumn(name="playerId")
     private Map<Long, Plan> plans = new HashMap<>();
+
+    @OneToMany(mappedBy="step", cascade = CascadeType.ALL)
+    private List<Recommendation> recommendations = new ArrayList<>();
 
     public DetectiveStep() {
     }
@@ -61,5 +66,13 @@ public class DetectiveStep {
 
     public void setRound(int round) {
         this.round = round;
+    }
+
+    public List<Recommendation> getRecommendations() {
+        return recommendations;
+    }
+
+    public void setRecommendations(List<Recommendation> recommendations) {
+        this.recommendations = recommendations;
     }
 }

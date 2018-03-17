@@ -78,6 +78,15 @@ public class GameController {
         return gameService.addDetectivePlan(game, plan);
     }
 
+    @PostMapping("/games/{id}/recommendation")
+    public Game addRecommendation(@PathVariable(value = "id") Long id, @Valid @RequestBody Recommendation recommendation) {
+
+        Game game = gameRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Game", "id", id));
+
+        return gameService.addRecommendation(game, recommendation);
+    }
+
     @PostMapping("/games/{id}/plans/{planId}/react")
     public Plan approvePlan(@PathVariable(value = "id") Long id, @PathVariable(value = "planId") Long planId, @RequestParam("playerId") Long playerId,
                             @ApiParam(value = "approve or refuse", required = true)
