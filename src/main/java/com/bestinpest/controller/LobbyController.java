@@ -137,16 +137,16 @@ public class LobbyController {
     }
 
     @GetMapping("/lobbies/{id}/join/auth")
-    public ResponseEntity<?> ToLobby(@PathVariable(value = "id") Long id, @RequestParam("password") String password) {
+    public boolean ToLobby(@PathVariable(value = "id") Long id, @RequestParam("password") String password) {
 
         Lobby lobby = lobbyRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
 
         if (!lobby.isValidPassword(password)) {
-            return ResponseEntity.status(401).build();
+            throw new BadRequestException("Invalid password");
         }
 
-        return ResponseEntity.ok().build();
+        return true;
     }
 
     @PostMapping("/lobbies/{id}/criminal")

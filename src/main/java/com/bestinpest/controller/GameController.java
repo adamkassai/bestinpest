@@ -39,6 +39,9 @@ public class GameController {
     PlanRepository planRepository;
 
     @Autowired
+    RecommendationRepository recommendationRepository;
+
+    @Autowired
     RabbitTemplate rabbitTemplate;
 
     @GetMapping("/games/{id}")
@@ -106,6 +109,28 @@ public class GameController {
 
         gameService.evaluateRound(game);
         return plan;
+    }
+
+    @DeleteMapping("/games/{id}/recommendations/{recommendationId}")
+    public Game deleteRecommendation(@PathVariable(value = "id") Long id, @PathVariable(value = "recommendationId") Long recommendationId) {
+
+        Game game = gameRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Game", "id", id));
+
+        Recommendation recommendation = recommendationRepository.findById(recommendationId)
+                .orElseThrow(() -> new NotFoundException("Plan", "id", id));
+
+        DetectiveStep step = game.getDetectiveStepByRound(game.getRound());
+
+        step.getRecommendations().remove(recommendation);
+        detectiveStepRepository.save(step);
+        recommendationRepository.delete(recommendation);
+        game = gameRepository.save(game);
+
+        RabbitMessage m = new RabbitMessage(recommendationId+" recommendation is removed.", "recommendation-removed", game);
+        rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
+
+        return game;
     }
 
     @PostMapping("/games/{id}/players/{playerId}/ready")
