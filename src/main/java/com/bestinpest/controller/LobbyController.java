@@ -136,8 +136,8 @@ public class LobbyController {
         return routeService.getFreeJunctionsNearby(lat, lon, new ArrayList<>());
     }
 
-    @PostMapping("/lobbies/{id}/join/auth")
-    public ResponseEntity<?> ToLobby(@PathVariable(value = "id") Long id, @RequestBody String password) {
+    @GetMapping("/lobbies/{id}/join/auth")
+    public ResponseEntity<?> ToLobby(@PathVariable(value = "id") Long id, @RequestParam("password") String password) {
 
         Lobby lobby = lobbyRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
