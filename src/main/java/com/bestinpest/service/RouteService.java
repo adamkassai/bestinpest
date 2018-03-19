@@ -1,11 +1,19 @@
 package com.bestinpest.service;
 
+import com.bestinpest.Application;
 import com.bestinpest.model.*;
 import com.bestinpest.repository.JunctionRepository;
 import com.bestinpest.repository.RouteRepository;
 import com.bestinpest.repository.StopRepository;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +21,8 @@ import java.util.Optional;
 
 @Service
 public class RouteService {
+
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     @Autowired
     StopRepository stopRepository;
@@ -22,6 +32,9 @@ public class RouteService {
 
     @Autowired
     RouteRepository routeRepository;
+
+    @Autowired
+    RestTemplate restTemplate;
 
     public List<Route> getRoutesBetween(String departureId, String arrivalId)
     {
@@ -123,6 +136,54 @@ public class RouteService {
         //TODO
         return stops;
     }
+
+
+    public List<Trip> getSchedule(Route route) {
+
+        String response = restTemplate.getForObject(
+                "http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/arrivals-and-departures-for-stop.json?includeReferences=true&minutesBefore=2&minutesAfter=30&stopId="+route.getDeparture().getId(), String.class);
+
+        JsonParser parser = new JsonParser();
+        JsonArray stopTimesArray = parser.parse(response).getAsJsonObject().getAsJsonObject("data").getAsJsonObject("entry").getAsJsonArray("stopTimes");
+
+        List<Trip> trips = new ArrayList<>();
+
+        for (JsonElement stopTimesElement : stopTimesArray) {
+            JsonObject stopTimesObject = stopTimesElement.getAsJsonObject();
+            String tripId = stopTimesObject.get("tripId").getAsString();
+
+            JsonObject tripObject = parser.parse(response).getAsJsonObject().getAsJsonObject("data").getAsJsonObject("references").getAsJsonObject("trips")
+                    .getAsJsonObject(tripId);
+
+            String relationId = tripObject.get("routeId").getAsString();
+
+            if (route.containsRelation(relationId)) {
+
+                String relationName = parser.parse(response).getAsJsonObject().getAsJsonObject("data").getAsJsonObject("references").getAsJsonObject("routes")
+                        .getAsJsonObject(relationId).get("shortName").getAsString();
+
+                String tripHeadsign = tripObject.get("tripHeadsign").getAsString();
+                JsonElement departureTime = stopTimesObject.get("departureTime");
+                JsonElement predictedDepartureTime = stopTimesObject.get("predictedDepartureTime");
+                JsonElement arrivalTime = stopTimesObject.get("arrivalTime");
+                JsonElement predictedArrivalTime = stopTimesObject.get("predictedArrivalTime");
+                Long time=null;
+                Long predictedTime=null;
+
+                if (departureTime!=null) { time=departureTime.getAsLong();
+                }else if (arrivalTime!=null) { time=arrivalTime.getAsLong(); }
+
+                if (predictedDepartureTime!=null) { predictedTime=predictedDepartureTime.getAsLong();
+                }else if (predictedArrivalTime!=null) { predictedTime=predictedArrivalTime.getAsLong(); }
+
+                trips.add(new Trip(time, predictedTime, relationName, relationId, tripHeadsign, tripId));
+            }
+
+        }
+
+        return trips;
+    }
+
 
     // Source:
     // https://stackoverflow.com/questions/3694380/calculating-distance-between-two-points-using-latitude-longitude-what-am-i-doi

@@ -180,50 +180,39 @@ public class LobbyController {
     }
 
     @DeleteMapping("/lobbies/{id}")
-    public ResponseEntity<?> deleteLobby(@PathVariable(value = "id") Long id) {
+    public List<Lobby> deleteLobby(@PathVariable(value = "id") Long id) {
 
-        Optional<Lobby> lobby = lobbyRepository.findById(id);
+        Lobby lobby = lobbyRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
 
-        if (!lobby.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
+        lobby.setLeader(null);
+        lobbyRepository.save(lobby);
+        playerRepository.delete(lobby.getPlayers());
 
-        Lobby existingLobby = lobby.get();
-        existingLobby.setLeader(null);
-        lobbyRepository.save(existingLobby);
-        playerRepository.delete(existingLobby.getPlayers());
+        RabbitMessage m = new RabbitMessage("Lobby is deleted.", "lobby-deleted", lobby);
+        rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + lobby.getId(), m.toString());
 
-        RabbitMessage m = new RabbitMessage("Lobby is deleted.", "lobby-deleted", existingLobby);
-        rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + existingLobby.getId(), m.toString());
-
-        lobbyRepository.delete(existingLobby);
-        return ResponseEntity.ok().build();
+        lobbyRepository.delete(lobby);
+        return lobbyRepository.findAll();
     }
 
     @DeleteMapping("/lobbies/{id}/players/{playerId}")
-    public ResponseEntity<?> deletePlayer(@PathVariable(value = "id") Long id, @PathVariable(value = "playerId") Long playerId) {
+    public Lobby deletePlayer(@PathVariable(value = "id") Long id, @PathVariable(value = "playerId") Long playerId) {
 
-        Optional<Lobby> lobby = lobbyRepository.findById(id);
 
-        if (!lobby.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
+        Lobby lobby = lobbyRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
 
-        Optional<Player> player = playerRepository.findById(playerId);
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new NotFoundException("Player", "id", playerId));
 
-        if (!player.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-        Lobby existingLobby = lobby.get();
-        existingLobby.getPlayers().remove(player);
+        lobby = lobbyRepository.save(lobby);
+        playerRepository.delete(player);
 
-        existingLobby = lobbyRepository.save(existingLobby);
-        playerRepository.delete(player.get());
+        RabbitMessage m = new RabbitMessage(player.getName() + " is removed from the lobby.", "player-removed", lobby);
+        rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + lobby.getId(), m.toString());
 
-        RabbitMessage m = new RabbitMessage(player.get().getName() + " is removed from the lobby.", "player-removed", existingLobby);
-        rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + existingLobby.getId(), m.toString());
-
-        return ResponseEntity.ok().build();
+        return lobby;
     }
 
     @PostMapping("/lobbies/{id}/players/{playerId}/ready")

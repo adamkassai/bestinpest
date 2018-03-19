@@ -60,9 +60,6 @@ public class Application {
             player2.setLobby(lobby);
             playerRepository.save(player2);
 
-            lobbyRepository.save(new Lobby("Elso probajatek"));
-            lobbyRepository.save(new Lobby("Ez mar a masodik"));
-
 
             //
 

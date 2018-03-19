@@ -1,17 +1,25 @@
 package com.bestinpest.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.bestinpest.Application;
+import com.bestinpest.service.RouteService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Route {
 
+    @Transient
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
+
     @Id
     @GeneratedValue
     private Long id;
-
 
     @ManyToOne
     @JoinColumn(name="departure")
@@ -21,22 +29,18 @@ public class Route {
     @JoinColumn(name="arrival")
     private Stop arrival;
 
-    private String type;
-    private String relationId;
-    private String relationName;
-    private String headsign;
+    @OneToMany(mappedBy="route", cascade = CascadeType.ALL)
+    private List<Relation> relations = new ArrayList<>();
 
+    private String type;
 
     public Route() {
     }
 
-    public Route(Stop departure, Stop arrival, String type, String relationId, String relationName, String headsign) {
+    public Route(Stop departure, Stop arrival, String type) {
         this.departure = departure;
         this.arrival = arrival;
         this.type = type;
-        this.relationId = relationId;
-        this.relationName = relationName;
-        this.headsign = headsign;
     }
 
     public Long getId() {
@@ -71,27 +75,16 @@ public class Route {
         this.arrival = arrival;
     }
 
-    public String getRelationId() {
-        return relationId;
+    public List<Relation> getRelations() {
+        return relations;
     }
 
-    public void setRelationId(String relationId) {
-        this.relationId = relationId;
+    public void setRelations(List<Relation> relations) {
+        this.relations = relations;
     }
 
-    public String getRelationName() {
-        return relationName;
+    public boolean containsRelation(String relationId){
+        return relations.stream().filter(o -> o.getRelationId().equals(relationId)).findFirst().isPresent();
     }
 
-    public void setRelationName(String relationName) {
-        this.relationName = relationName;
-    }
-
-    public String getHeadsign() {
-        return headsign;
-    }
-
-    public void setHeadsign(String headsign) {
-        this.headsign = headsign;
-    }
 }

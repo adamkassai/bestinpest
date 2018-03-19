@@ -3,6 +3,7 @@ package com.bestinpest.controller;
 import com.bestinpest.exception.NotFoundException;
 import com.bestinpest.model.Junction;
 import com.bestinpest.model.Route;
+import com.bestinpest.model.Trip;
 import com.bestinpest.repository.JunctionRepository;
 import com.bestinpest.repository.RouteRepository;
 import com.bestinpest.repository.StopRepository;
@@ -49,6 +50,14 @@ public class RouteController {
     public Junction getJunctionById(@PathVariable(value = "id") String id) {
         return junctionRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Junction", "id", id));
+    }
+
+    @GetMapping("/routes/{id}/schedule")
+    public List<Trip> getSchedule(@PathVariable(value = "id") Long id) {
+        Route route = routeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Route", "id", id));
+
+        return routeService.getSchedule(route);
     }
 
 }

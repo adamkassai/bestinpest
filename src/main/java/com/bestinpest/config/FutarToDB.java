@@ -1,10 +1,9 @@
 package com.bestinpest.config;
 
 import com.bestinpest.Application;
-import com.bestinpest.model.Junction;
-import com.bestinpest.model.Route;
-import com.bestinpest.model.Stop;
+import com.bestinpest.model.*;
 import com.bestinpest.repository.JunctionRepository;
+import com.bestinpest.repository.RelationRepository;
 import com.bestinpest.repository.RouteRepository;
 import com.bestinpest.repository.StopRepository;
 import com.google.gson.*;
@@ -30,6 +29,9 @@ public class FutarToDB implements CommandLineRunner {
 
     @Autowired
     RouteRepository routeRepository;
+
+    @Autowired
+    RelationRepository relationRepository;
 
     @Autowired
     RestTemplate restTemplate;
@@ -94,6 +96,8 @@ public class FutarToDB implements CommandLineRunner {
 
         }
 
+        Map<String, Route> routes = new HashMap<>();
+
 
         for (String routeId : routeList)
         {
@@ -104,6 +108,8 @@ public class FutarToDB implements CommandLineRunner {
             String relationName = entry.get("shortName").getAsString();
             String relationId = entry.get("id").getAsString();
             String type = entry.get("type").getAsString();
+            String textColor = entry.get("textColor").getAsString();
+            String backgroundColor = entry.get("color").getAsString();
             JsonArray variantsArray = entry.getAsJsonArray("variants");
 
             for (JsonElement variantElement: variantsArray)
@@ -127,7 +133,19 @@ public class FutarToDB implements CommandLineRunner {
 
                             if (terminalStop.isPresent())
                             {
-                                routeRepository.save(new Route(stop.get(), terminalStop.get(), type, relationId, relationName, headsign));
+                                String id = stop.get().getId()+terminalStop.get().getId()+type;
+                                Route route;
+                                if (routes.containsKey(id))
+                                {
+                                    route = routes.get(id);
+                                }else{
+                                    route = routeRepository.save(new Route(stop.get(), terminalStop.get(), type));
+                                    routes.put(id, route);
+                                }
+
+                                Relation relation = relationRepository.save(new Relation(relationId, relationName, headsign, textColor, backgroundColor, route));
+                                route.getRelations().add(relation);
+                                routeRepository.save(route);
                             }else{
                                 end++;
                             }
@@ -143,7 +161,6 @@ public class FutarToDB implements CommandLineRunner {
             }
 
         }
-
 
     }
 }
