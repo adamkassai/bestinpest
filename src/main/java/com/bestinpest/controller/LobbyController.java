@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.Lob;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -137,7 +138,7 @@ public class LobbyController {
     }
 
     @GetMapping("/lobbies/{id}/join/auth")
-    public boolean ToLobby(@PathVariable(value = "id") Long id, @RequestParam("password") String password) {
+    public Lobby authToLobby(@PathVariable(value = "id") Long id, @RequestParam("password") String password) {
 
         Lobby lobby = lobbyRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Lobby", "id", id));
@@ -146,7 +147,7 @@ public class LobbyController {
             throw new BadRequestException("Invalid password");
         }
 
-        return true;
+        return lobby;
     }
 
     @PostMapping("/lobbies/{id}/criminal")
