@@ -46,6 +46,12 @@ public class RouteController {
         return routeService.getRoutesBetween(departureId, arrivalId);
     }
 
+    @GetMapping("/routes/{id}")
+    public Route getRouteById(@PathVariable(value = "id") Long id) {
+        return routeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Route", "id", id));
+    }
+
     @GetMapping("/junctions/{id}")
     public Junction getJunctionById(@PathVariable(value = "id") String id) {
         return junctionRepository.findById(id)

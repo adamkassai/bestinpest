@@ -9,6 +9,7 @@ public class Relation {
 
     @Id
     @GeneratedValue
+    @JsonIgnore
     private Long id;
     private String relationId;
     private String relationName;

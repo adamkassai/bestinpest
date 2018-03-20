@@ -155,4 +155,15 @@ public class GameController {
         return player;
     }
 
+
+    @DeleteMapping("/games/{id}")
+    public Game deleteGame(@PathVariable(value = "id") Long id) {
+
+        Game game = gameRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Game", "id", id));
+
+        return gameService.deleteGame(game);
+    }
+
+
 }

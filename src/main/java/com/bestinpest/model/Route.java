@@ -29,10 +29,10 @@ public class Route {
     @JoinColumn(name="arrival")
     private Stop arrival;
 
+    private String type;
+
     @OneToMany(mappedBy="route", cascade = CascadeType.ALL)
     private List<Relation> relations = new ArrayList<>();
-
-    private String type;
 
     public Route() {
     }

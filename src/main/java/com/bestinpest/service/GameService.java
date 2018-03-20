@@ -62,6 +62,7 @@ public class GameService {
         }else if (game.getRound()<gameConfig.getMaxRoundNumber()){
             game.setTurn("criminal");
             game.setRound(game.getRound()+1);
+
             game = gameRepository.save(game);
 
             RabbitMessage m = new RabbitMessage("Criminal's turn.", "turn-changed", game);
@@ -284,11 +285,68 @@ public class GameService {
             gameRepository.save(game);
             RabbitMessage m = new RabbitMessage("Criminal is caught.", "criminal-caught", game);
             rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
-            //End game
+
+            deleteGame(game);
+
             return;
         }
 
         changeTurn(game);
     }
+
+
+    public Game deleteGame(Game game) {
+
+        for(CriminalStep step: game.getCriminalSteps())
+        {
+            step.setGame(null);
+            criminalStepRepository.save(step);
+        }
+        criminalStepRepository.delete(game.getCriminalSteps());
+        game.getCriminalSteps().clear();
+
+        for(DetectiveStep step: game.getDetectiveSteps())
+        {
+            for (Player player: game.getPlayers())
+            {
+                if (step.getPlans().containsKey(player.getId())) {
+                    step.getPlans().get(player.getId()).getReactions().clear();
+                }
+            }
+
+            step.getPlans().clear();
+
+            for (Recommendation recommendation : step.getRecommendations())
+            {
+                recommendation.setStep(null);
+                recommendationRepository.save(recommendation);
+            }
+            recommendationRepository.delete(step.getRecommendations());
+            step.getRecommendations().clear();
+
+            step.setGame(null);
+            detectiveStepRepository.save(step);
+        }
+        detectiveStepRepository.delete(game.getDetectiveSteps());
+        game.getDetectiveSteps().clear();
+
+        for (Player player: game.getPlayers())
+        {
+            player.getTickets().clear();
+            player.setGame(null);
+            playerRepository.save(player);
+        }
+        playerRepository.delete(game.getPlayers());
+        game.getPlayers().clear();
+
+        game = gameRepository.save(game);
+        gameRepository.delete(game);
+
+        RabbitMessage m = new RabbitMessage("Game is removed.", "game-removed", game);
+        rabbitTemplate.convertAndSend("bip-exchange", "game:" + game.getId(), m.toString());
+
+        return game;
+    }
+
 
 }

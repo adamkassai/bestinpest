@@ -68,7 +68,7 @@ public class FutarToDB implements CommandLineRunner {
 
                 for (JsonElement routeElement : routesArray) {
                     String routeId = routeElement.getAsString();
-                    if (!routeList.contains(routeId)) {
+                    if (!routeList.contains(routeId) && !routeId.substring(0, 5).equals("BKK_9")) {
                         routeList.add(routeId);
                     }
                 }
