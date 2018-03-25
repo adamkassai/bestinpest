@@ -88,6 +88,9 @@ public class LobbyController {
         RabbitMessage m = new RabbitMessage(player.getName() + " joined the lobby.", "player-joined", lobby);
         rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + lobby.getId(), m.toString());
 
+        m = new RabbitMessage(lobby.getName() + " has a new player.", "player-joined", lobbyRepository.findAll());
+        rabbitTemplate.convertAndSend("bip-exchange", "lobbies", m.toString());
+
         return lobby;
     }
 
@@ -128,6 +131,10 @@ public class LobbyController {
 
         lobbyRepository.save(lobby);
         lobbyRepository.delete(lobby);
+
+        m = new RabbitMessage(lobby.getName() + " started the game.", "game-started", lobbyRepository.findAll());
+        rabbitTemplate.convertAndSend("bip-exchange", "lobbies", m.toString());
+
         return game;
     }
 
@@ -193,6 +200,10 @@ public class LobbyController {
         rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + lobby.getId(), m.toString());
 
         lobbyRepository.delete(lobby);
+
+        m = new RabbitMessage(lobby.getName() + " is deleted.", "lobby-deleted", lobbyRepository.findAll());
+        rabbitTemplate.convertAndSend("bip-exchange", "lobbies", m.toString());
+
         return lobbyRepository.findAll();
     }
 
@@ -211,6 +222,9 @@ public class LobbyController {
 
         RabbitMessage m = new RabbitMessage(player.getName() + " is removed from the lobby.", "player-removed", lobby);
         rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + lobby.getId(), m.toString());
+
+        m = new RabbitMessage(lobby.getName() + " has a player removed.", "player-removed", lobbyRepository.findAll());
+        rabbitTemplate.convertAndSend("bip-exchange", "lobbies", m.toString());
 
         return lobby;
     }
