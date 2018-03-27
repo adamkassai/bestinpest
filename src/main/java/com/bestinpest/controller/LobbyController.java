@@ -53,10 +53,11 @@ public class LobbyController {
         }
 
         Player leader = lobby.getLeader();
-        playerRepository.save(leader);
+        leader = playerRepository.save(leader);
         lobbyRepository.save(lobby);
 
         lobby.getPlayers().add(leader);
+        lobby.setCriminalId(leader.getId());
         leader.setLobby(lobby);
         playerRepository.save(leader);
         lobby = lobbyRepository.save(lobby);
@@ -216,6 +217,10 @@ public class LobbyController {
 
         Player player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new NotFoundException("Player", "id", playerId));
+
+        if (player.getId().equals(lobby.getCriminalId())) {
+            lobby.setCriminalId(lobby.getLeader().getId());
+        }
 
         lobby = lobbyRepository.save(lobby);
         playerRepository.delete(player);
