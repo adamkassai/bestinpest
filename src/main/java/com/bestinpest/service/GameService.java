@@ -37,6 +37,9 @@ public class GameService {
     PlanRepository planRepository;
 
     @Autowired
+    JunctionRepository junctionRepository;
+
+    @Autowired
     RecommendationRepository recommendationRepository;
 
     @Autowired
@@ -118,7 +121,11 @@ public class GameService {
 
                     Plan plan = step.getPlans().get(player.getId());
 
-                    player.setJunctionId(plan.getArrivalJunctionId());
+                    Junction arrivalJunction = junctionRepository.findById(plan.getArrivalJunctionId())
+                            .orElseThrow(() -> new NotFoundException("Junction", "id", plan.getArrivalJunctionId()));
+
+                    player.setJunctionId(arrivalJunction.getId());
+                    player.setJunctionName(arrivalJunction.getName());
                     player.setReady(false);
 
                     Route route = routeRepository.findById(plan.getRouteId())
@@ -195,6 +202,15 @@ public class GameService {
             throw new BadRequestException("You don't have ticket for this route.");
         }
 
+        Junction departureJunction = junctionRepository.findById(plan.getDepartureJunctionId())
+                .orElseThrow(() -> new NotFoundException("departureJunction", "id", plan.getDepartureJunctionId()));
+
+        Junction arrivalJunction = junctionRepository.findById(plan.getArrivalJunctionId())
+                .orElseThrow(() -> new NotFoundException("arrivalJunction", "id", plan.getArrivalJunctionId()));
+
+        plan.setDepartureJunctionName(departureJunction.getName());
+        plan.setArrivalJunctionName(arrivalJunction.getName());
+
         planRepository.save(plan);
         DetectiveStep step = game.getDetectiveStepByRound(game.getRound());
         step.getPlans().put(player.getId(), plan);
@@ -213,6 +229,14 @@ public class GameService {
         Player player = playerRepository.findById(recommendation.getSenderPlayerId())
                 .orElseThrow(() -> new NotFoundException("Player", "id", recommendation.getSenderPlayerId()));
 
+        Junction departureJunction = junctionRepository.findById(recommendation.getDepartureJunctionId())
+                .orElseThrow(() -> new NotFoundException("departureJunction", "id", recommendation.getDepartureJunctionId()));
+
+        Junction arrivalJunction = junctionRepository.findById(recommendation.getArrivalJunctionId())
+                .orElseThrow(() -> new NotFoundException("arrivalJunction", "id", recommendation.getArrivalJunctionId()));
+
+        recommendation.setDepartureJunctionName(departureJunction.getName());
+        recommendation.setArrivalJunctionName(arrivalJunction.getName());
 
         DetectiveStep step = game.getDetectiveStepByRound(game.getRound());
         recommendation.setStep(step);
@@ -244,12 +268,22 @@ public class GameService {
             step.setType(route.getType());
         }
 
+        Junction departureJunction = junctionRepository.findById(step.getDepartureJunctionId())
+                .orElseThrow(() -> new NotFoundException("departureJunction", "id", step.getDepartureJunctionId()));
+
+        Junction arrivalJunction = junctionRepository.findById(step.getArrivalJunctionId())
+                .orElseThrow(() -> new NotFoundException("arrivalJunction", "id", step.getArrivalJunctionId()));
+
+        step.setDepartureJunctionName(departureJunction.getName());
+        step.setArrivalJunctionName(arrivalJunction.getName());
+
         step.setGame(game);
         step.setRound(game.getRound());
         if (gameConfig.getVisibleCriminalRounds().contains(step.getRound())) { step.setVisible(true); }
         criminalStepRepository.save(step);
         game.getCriminalSteps().add(step);
-        player.setJunctionId(step.getArrivalJunctionId());
+        player.setJunctionId(arrivalJunction.getId());
+        player.setJunctionName(arrivalJunction.getName());
         player.setReady(false);
         playerRepository.save(player);
 

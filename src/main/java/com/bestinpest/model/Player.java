@@ -26,6 +26,7 @@ public class Player {
     private Game game;
 
     private String junctionId;
+    private String junctionName;
     private String name;
     private Boolean ready;
 
@@ -44,6 +45,12 @@ public class Player {
         this.junctionId = junctionId;
         this.name = name;
         this.ready=false;
+    }
+
+    public Player(String name, String junctionId, String junctionName) {
+        this.junctionId = junctionId;
+        this.junctionName = junctionName;
+        this.name = name;
     }
 
     public Long getId() {
@@ -92,5 +99,13 @@ public class Player {
 
     public void setTickets(Map<String, Integer> tickets) {
         this.tickets = tickets;
+    }
+
+    public String getJunctionName() {
+        return junctionName;
+    }
+
+    public void setJunctionName(String junctionName) {
+        this.junctionName = junctionName;
     }
 }

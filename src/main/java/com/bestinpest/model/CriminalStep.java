@@ -19,7 +19,9 @@ public class CriminalStep {
     private int round;
 
     private String departureJunctionId;
+    private String departureJunctionName;
     private String arrivalJunctionId;
+    private String arrivalJunctionName;
     private Long routeId;
     private Boolean visible=false;
     private String type;
@@ -33,6 +35,15 @@ public class CriminalStep {
         this.arrivalJunctionId = arrivalJunctionId;
         this.routeId = routeId;
         this.visible=false;
+    }
+
+    public CriminalStep(Game game, String departureJunctionId, String departureJunctionName, String arrivalJunctionId, String arrivalJunctionName, Long routeId) {
+        this.game = game;
+        this.departureJunctionId = departureJunctionId;
+        this.departureJunctionName = departureJunctionName;
+        this.arrivalJunctionId = arrivalJunctionId;
+        this.arrivalJunctionName = arrivalJunctionName;
+        this.routeId = routeId;
     }
 
     public Long getId() {
@@ -97,5 +108,21 @@ public class CriminalStep {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getDepartureJunctionName() {
+        return departureJunctionName;
+    }
+
+    public void setDepartureJunctionName(String departureJunctionName) {
+        this.departureJunctionName = departureJunctionName;
+    }
+
+    public String getArrivalJunctionName() {
+        return arrivalJunctionName;
+    }
+
+    public void setArrivalJunctionName(String arrivalJunctionName) {
+        this.arrivalJunctionName = arrivalJunctionName;
     }
 }

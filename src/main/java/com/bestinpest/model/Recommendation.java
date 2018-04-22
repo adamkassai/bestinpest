@@ -12,7 +12,9 @@ public class Recommendation {
     private Long id;
 
     private String departureJunctionId;
+    private String departureJunctionName;
     private String arrivalJunctionId;
+    private String arrivalJunctionName;
     private Long senderPlayerId;
     private Long receiverPlayerId;
 
@@ -70,5 +72,21 @@ public class Recommendation {
 
     public void setStep(DetectiveStep step) {
         this.step = step;
+    }
+
+    public String getDepartureJunctionName() {
+        return departureJunctionName;
+    }
+
+    public void setDepartureJunctionName(String departureJunctionName) {
+        this.departureJunctionName = departureJunctionName;
+    }
+
+    public String getArrivalJunctionName() {
+        return arrivalJunctionName;
+    }
+
+    public void setArrivalJunctionName(String arrivalJunctionName) {
+        this.arrivalJunctionName = arrivalJunctionName;
     }
 }

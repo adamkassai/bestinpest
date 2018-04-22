@@ -11,7 +11,9 @@ public class Plan {
     private Long id;
 
     private String departureJunctionId;
+    private String departureJunctionName;
     private String arrivalJunctionId;
+    private String arrivalJunctionName;
     private Long routeId;
     private Long playerId;
 
@@ -25,6 +27,15 @@ public class Plan {
     public Plan(String departureJunctionId, String arrivalJunctionId, Long routeId, Long playerId) {
         this.departureJunctionId = departureJunctionId;
         this.arrivalJunctionId = arrivalJunctionId;
+        this.routeId = routeId;
+        this.playerId = playerId;
+    }
+
+    public Plan(String departureJunctionId, String departureJunctionName, String arrivalJunctionId, String arrivalJunctionName, Long routeId, Long playerId) {
+        this.departureJunctionId = departureJunctionId;
+        this.departureJunctionName = departureJunctionName;
+        this.arrivalJunctionId = arrivalJunctionId;
+        this.arrivalJunctionName = arrivalJunctionName;
         this.routeId = routeId;
         this.playerId = playerId;
     }
@@ -75,5 +86,21 @@ public class Plan {
 
     public void setReactions(Map<Long, String> reactions) {
         this.reactions = reactions;
+    }
+
+    public String getDepartureJunctionName() {
+        return departureJunctionName;
+    }
+
+    public void setDepartureJunctionName(String departureJunctionName) {
+        this.departureJunctionName = departureJunctionName;
+    }
+
+    public String getArrivalJunctionName() {
+        return arrivalJunctionName;
+    }
+
+    public void setArrivalJunctionName(String arrivalJunctionName) {
+        this.arrivalJunctionName = arrivalJunctionName;
     }
 }

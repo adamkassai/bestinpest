@@ -5,6 +5,7 @@ import com.bestinpest.exception.BadRequestException;
 import com.bestinpest.model.*;
 import com.bestinpest.exception.NotFoundException;
 import com.bestinpest.repository.GameRepository;
+import com.bestinpest.repository.JunctionRepository;
 import com.bestinpest.repository.LobbyRepository;
 import com.bestinpest.repository.PlayerRepository;
 import com.bestinpest.service.RouteService;
@@ -33,6 +34,9 @@ public class LobbyController {
 
     @Autowired
     GameConfig gameConfig;
+
+    @Autowired
+    JunctionRepository junctionRepository;
 
     @Autowired
     RabbitTemplate rabbitTemplate;
@@ -80,6 +84,11 @@ public class LobbyController {
 
         playerRepository.save(player);
         lobby.getPlayers().add(player);
+
+        Junction junction = junctionRepository.findById(player.getJunctionId())
+                .orElseThrow(() -> new NotFoundException("departureJunction", "id", player.getJunctionId()));
+
+        player.setJunctionName(junction.getName());
 
         player.setLobby(lobby);
         playerRepository.save(player);
