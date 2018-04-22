@@ -44,10 +44,21 @@ public class GameController {
     @Autowired
     RabbitTemplate rabbitTemplate;
 
+    @GetMapping("/games")
+    public List<Game> games() {
+        return gameRepository.findAll();
+    }
+
     @GetMapping("/games/{id}")
     public Game getGameById(@PathVariable(value = "id") Long id) {
         return gameRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Game", "id", id));
+    }
+
+    @GetMapping("/players/{id}")
+    public Player getPlayerById(@PathVariable(value = "id") Long id) {
+        return playerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Player", "id", id));
     }
 
     @GetMapping("/players/{id}/available-junctions")

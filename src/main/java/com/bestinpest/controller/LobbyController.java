@@ -57,6 +57,12 @@ public class LobbyController {
         }
 
         Player leader = lobby.getLeader();
+
+        Junction junction = junctionRepository.findById(leader.getJunctionId())
+                .orElseThrow(() -> new NotFoundException("Junction", "id", null));
+
+        leader.setJunctionName(junction.getName());
+
         leader = playerRepository.save(leader);
         lobbyRepository.save(lobby);
 
