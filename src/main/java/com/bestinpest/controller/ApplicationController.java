@@ -11,7 +11,9 @@ public class ApplicationController {
 
     @GetMapping("/rabbitmq-rx-url")
     public Map<String, String> rabbitmqRxUrl() {
-        return new HashMap<String, String>(){{put("url", System.getenv("RABBITMQ_BIGWIG_RX_URL"));}};
+        HashMap<String, String> map = new HashMap<>();
+        map.put("url", System.getenv("RABBITMQ_BIGWIG_RX_URL"));
+        return map;
     }
 
 }
