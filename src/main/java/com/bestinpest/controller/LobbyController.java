@@ -139,7 +139,7 @@ public class LobbyController {
 
         game = gameRepository.save(game);
 
-        RabbitMessage m = new RabbitMessage("Lobby is ready to play the game.", "game-started", game);
+        RabbitMessage m = new RabbitMessage("Lobby is ready to play the game.", "game-started", lobby);
         rabbitTemplate.convertAndSend("bip-exchange", "lobby:" + lobby.getId(), m.toString());
 
         lobbyRepository.save(lobby);
