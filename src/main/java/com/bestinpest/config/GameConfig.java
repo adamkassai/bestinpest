@@ -20,7 +20,7 @@ public class GameConfig {
 
         maxRoundNumber=20;
         visibleCriminalRounds = Arrays.asList(3, 8, 13, 18);
-        cityRadius = 1000;
+        cityRadius = 2000;
 
         tickets = new HashMap<String, Integer>();
         tickets.put("BUS-TROLLEY", 15);

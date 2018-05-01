@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class RouteService {
@@ -94,7 +92,14 @@ public class RouteService {
         junctions.removeAll(junctionsInOneStepRadius);
         junctions.removeAll(junctionsInTwoStepRadius);
 
-        return junctions;
+        Collections.sort(junctions, new DistanceComparator(lat, lon));
+
+        if (junctions.size()==0) { return junctions; }
+
+        int max = junctions.size();
+        if (10<max) { max=10; }
+
+        return junctions.subList(0, max);
     }
 
     public List<Junction> getJunctionsFromJunction(Junction junction) {
@@ -203,5 +208,28 @@ public class RouteService {
 
         return Math.sqrt(distance);
     }
+
+
+    class DistanceComparator implements Comparator<Junction>
+    {
+
+        private double lat;
+        private double lon;
+
+        public DistanceComparator(double lat, double lon) {
+            this.lat = lat;
+            this.lon = lon;
+        }
+
+        public int compare(Junction j1, Junction j2)
+        {
+            Stop s1 = j1.getStops().get(0);
+            Stop s2 = j2.getStops().get(0);
+            Double d1 = distance(lat, s1.getLat(), lon, s1.getLon());
+            Double d2 = distance(lat, s2.getLat(), lon, s2.getLon());
+            return d1.compareTo(d2);
+        }
+    }
+
 
 }
