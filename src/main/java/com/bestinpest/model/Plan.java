@@ -24,13 +24,6 @@ public class Plan {
     public Plan() {
     }
 
-    public Plan(String departureJunctionId, String arrivalJunctionId, Long routeId, Long playerId) {
-        this.departureJunctionId = departureJunctionId;
-        this.arrivalJunctionId = arrivalJunctionId;
-        this.routeId = routeId;
-        this.playerId = playerId;
-    }
-
     public Plan(String departureJunctionId, String departureJunctionName, String arrivalJunctionId, String arrivalJunctionName, Long routeId, Long playerId) {
         this.departureJunctionId = departureJunctionId;
         this.departureJunctionName = departureJunctionName;

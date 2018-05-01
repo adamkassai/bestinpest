@@ -1,6 +1,5 @@
 package com.bestinpest.repository;
 
-import com.bestinpest.model.Plan;
 import com.bestinpest.model.Relation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;

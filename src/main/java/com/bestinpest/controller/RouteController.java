@@ -6,7 +6,6 @@ import com.bestinpest.model.Route;
 import com.bestinpest.model.Trip;
 import com.bestinpest.repository.JunctionRepository;
 import com.bestinpest.repository.RouteRepository;
-import com.bestinpest.repository.StopRepository;
 import com.bestinpest.service.RouteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +17,6 @@ import java.util.List;
 
 @RestController
 public class RouteController {
-
-    @Autowired
-    StopRepository stopRepository;
 
     @Autowired
     JunctionRepository junctionRepository;

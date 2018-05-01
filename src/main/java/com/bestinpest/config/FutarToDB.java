@@ -1,14 +1,11 @@
 package com.bestinpest.config;
 
-import com.bestinpest.Application;
 import com.bestinpest.model.*;
 import com.bestinpest.repository.JunctionRepository;
 import com.bestinpest.repository.RelationRepository;
 import com.bestinpest.repository.RouteRepository;
 import com.bestinpest.repository.StopRepository;
 import com.google.gson.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -18,8 +15,6 @@ import java.util.*;
 
 @Component
 public class FutarToDB implements CommandLineRunner {
-
-    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     @Autowired
     StopRepository stopRepository;
@@ -40,7 +35,7 @@ public class FutarToDB implements CommandLineRunner {
     GameConfig gameConfig;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
 
         String response = restTemplate.getForObject(
                 "http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/stops-for-location.json?lat=47.497638&lon=19.053021&radius="+gameConfig.getCityRadius(), String.class);
@@ -153,8 +148,6 @@ public class FutarToDB implements CommandLineRunner {
                         }
 
                     }
-
-
 
                 }
 

@@ -22,7 +22,7 @@ public class GameConfig {
         visibleCriminalRounds = Arrays.asList(3, 8, 13, 18);
         cityRadius = 2000;
 
-        tickets = new HashMap<String, Integer>();
+        tickets = new HashMap<>();
         tickets.put("BUS-TROLLEY", 15);
         tickets.put("TRAM", 10);
         tickets.put("SUBWAY", 5);

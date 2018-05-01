@@ -1,11 +1,8 @@
 package com.bestinpest.model;
 
 import com.bestinpest.Application;
-import com.bestinpest.service.RouteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -84,7 +81,7 @@ public class Route {
     }
 
     public boolean containsRelation(String relationId){
-        return relations.stream().filter(o -> o.getRelationId().equals(relationId)).findFirst().isPresent();
+        return relations.stream().anyMatch(o -> o.getRelationId().equals(relationId));
     }
 
 }

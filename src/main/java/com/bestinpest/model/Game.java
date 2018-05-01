@@ -2,19 +2,13 @@ package com.bestinpest.model;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Entity
 public class Game {
 
     @Id
     private Long id;
-
-    /*@ManyToOne
-    @JoinColumn(name="criminalId")
-    private Player criminal;*/
 
     private Long criminalId;
 

@@ -1,16 +1,12 @@
 package com.bestinpest.service;
 
-import com.bestinpest.Application;
 import com.bestinpest.model.*;
 import com.bestinpest.repository.JunctionRepository;
 import com.bestinpest.repository.RouteRepository;
-import com.bestinpest.repository.StopRepository;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -19,11 +15,6 @@ import java.util.*;
 
 @Service
 public class RouteService {
-
-    private static final Logger log = LoggerFactory.getLogger(Application.class);
-
-    @Autowired
-    StopRepository stopRepository;
 
     @Autowired
     JunctionRepository junctionRepository;
@@ -94,7 +85,7 @@ public class RouteService {
 
         Collections.sort(junctions, new DistanceComparator(lat, lon));
 
-        if (junctions.size()==0) { return junctions; }
+        if (junctions.isEmpty()) { return junctions; }
 
         int max = junctions.size();
         if (10<max) { max=10; }
@@ -134,12 +125,6 @@ public class RouteService {
         }
 
         return departures;
-    }
-
-    public List<Stop> getNearbyStops(Double lat, Double lon, int radius) {
-        List<Stop> stops = stopRepository.findAll();
-        //TODO
-        return stops;
     }
 
 

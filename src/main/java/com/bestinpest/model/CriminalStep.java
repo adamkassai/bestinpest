@@ -1,7 +1,6 @@
 package com.bestinpest.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 
 @Entity
@@ -29,13 +28,6 @@ public class CriminalStep {
     public CriminalStep() {
     }
 
-    public CriminalStep(Game game, String departureJunctionId, String arrivalJunctionId, Long routeId) {
-        this.game = game;
-        this.departureJunctionId = departureJunctionId;
-        this.arrivalJunctionId = arrivalJunctionId;
-        this.routeId = routeId;
-        this.visible=false;
-    }
 
     public CriminalStep(Game game, String departureJunctionId, String departureJunctionName, String arrivalJunctionId, String arrivalJunctionName, Long routeId) {
         this.game = game;

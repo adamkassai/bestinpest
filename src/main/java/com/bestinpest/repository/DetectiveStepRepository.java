@@ -1,6 +1,5 @@
 package com.bestinpest.repository;
 
-import com.bestinpest.model.CriminalStep;
 import com.bestinpest.model.DetectiveStep;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;

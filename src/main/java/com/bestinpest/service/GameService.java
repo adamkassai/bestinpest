@@ -1,13 +1,10 @@
 package com.bestinpest.service;
 
-import com.bestinpest.Application;
 import com.bestinpest.config.GameConfig;
 import com.bestinpest.exception.BadRequestException;
 import com.bestinpest.exception.NotFoundException;
 import com.bestinpest.model.*;
 import com.bestinpest.repository.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,7 +45,6 @@ public class GameService {
     @Autowired
     GameConfig gameConfig;
 
-    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     public void changeTurn(Game game) {
         if (game.getTurn().equals("criminal")) {
@@ -97,11 +93,10 @@ public class GameService {
                 for (int j=0; j<game.getPlayers().size(); j++)
                 {
                     Player reactor = game.getPlayers().get(j);
-                    if (!reactor.getId().equals(game.getCriminalId()) && !reactor.getId().equals(player.getId()))
+                    if (!reactor.getId().equals(game.getCriminalId()) && !reactor.getId().equals(player.getId()) &&
+                            (!plan.getReactions().containsKey(reactor.getId()) || !plan.getReactions().get(reactor.getId()).equals("approve")))
                     {
-                        if (!plan.getReactions().containsKey(reactor.getId()) || !plan.getReactions().get(reactor.getId()).equals("approve")) {
                             return false;
-                        }
                     }
                 }
             }
