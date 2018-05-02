@@ -18,9 +18,9 @@ public class GameConfig {
 
     public GameConfig() {
 
-        maxRoundNumber=20;
+        maxRoundNumber=Integer.parseInt(System.getenv("BIP_MAX_ROUND_NUMBER"));
         visibleCriminalRounds = Arrays.asList(3, 8, 13, 18);
-        cityRadius = 2200;
+        cityRadius = Integer.parseInt(System.getenv("BIP_CITY_RADIUS"));
 
         tickets = new HashMap<>();
         tickets.put("BUS-TROLLEY", 15);
