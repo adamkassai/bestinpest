@@ -5,6 +5,7 @@ import com.bestinpest.repository.JunctionRepository;
 import com.bestinpest.repository.RelationRepository;
 import com.bestinpest.repository.RouteRepository;
 import com.bestinpest.repository.StopRepository;
+import com.bestinpest.service.RouteService;
 import com.google.gson.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -33,6 +34,9 @@ public class FutarToDB implements CommandLineRunner {
 
     @Autowired
     GameConfig gameConfig;
+
+    @Autowired
+    RouteService routeService;
 
     @Override
     public void run(String... args) {
@@ -153,6 +157,35 @@ public class FutarToDB implements CommandLineRunner {
 
             }
 
+        }
+
+        List<Junction> junctions = junctionRepository.findAll();
+        String type="WALK";
+
+        for(Junction j1 : junctions) {
+
+            for (Junction j2: junctions) {
+
+            if (routeService.distance(j1.getStops().get(0).getLat(), j2.getStops().get(0).getLat(), j1.getStops().get(0).getLon(), j2.getStops().get(0).getLon())<=gameConfig.getMaxWalkDistance()
+                    && routeService.getRoutesBetween(j1.getId(), j2.getId()).isEmpty()) {
+
+
+                String id = j1.getStops().get(0).getId()+j2.getStops().get(0).getId()+type;
+                Route route;
+                if (!routes.containsKey(id))
+                {
+                    route = routeRepository.save(new Route(j1.getStops().get(0), j2.getStops().get(0), type));
+                    routes.put(id, route);
+
+                    Relation relation = relationRepository.save(new Relation(id, "WALK", j2.getName(), "#FFFFFF", "#000000", route));
+                    route.getRelations().add(relation);
+                    routeRepository.save(route);
+                }
+
+
+            }
+
+            }
         }
 
     }

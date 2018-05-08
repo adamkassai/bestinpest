@@ -15,12 +15,14 @@ public class GameConfig {
     private List<Integer> visibleCriminalRounds;
     private int cityRadius;
     private Map<String, Integer> tickets;
+    private int maxWalkDistance;
 
     public GameConfig() {
 
         maxRoundNumber=Integer.parseInt(System.getenv("BIP_MAX_ROUND_NUMBER"));
         visibleCriminalRounds = Arrays.asList(3, 8, 13, 18);
         cityRadius = Integer.parseInt(System.getenv("BIP_CITY_RADIUS"));
+        maxWalkDistance = Integer.parseInt(System.getenv("BIP_MAX_WALK_DISTANCE"));
 
         tickets = new HashMap<>();
         tickets.put("BUS-TROLLEY", 15);
@@ -43,5 +45,9 @@ public class GameConfig {
 
     public Map<String, Integer> getTickets() {
         return tickets;
+    }
+
+    public int getMaxWalkDistance() {
+        return maxWalkDistance;
     }
 }
