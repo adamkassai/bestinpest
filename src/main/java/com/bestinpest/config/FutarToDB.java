@@ -59,18 +59,27 @@ public class FutarToDB implements CommandLineRunner {
 
             JsonArray routesArray = stopObject.get("routeIds").getAsJsonArray();
 
+            int routeNumber = 0;
+
             if (routesArray.size() > 0) {
-
-                Stop stop = new Stop(id, name, lat, lon);
-
 
                 for (JsonElement routeElement : routesArray) {
                     String routeId = routeElement.getAsString();
-                    if (!routeList.contains(routeId) && !routeId.substring(0, 5).equals("BKK_9")) {
-                        routeList.add(routeId);
+                    if (!routeId.substring(0, 5).equals("BKK_9")) {
+
+                        routeNumber++;
+
+                        if (!routeList.contains(routeId)) {
+                            routeList.add(routeId);
+                        }
                     }
                 }
 
+            }
+
+            if (routeNumber > 0) {
+
+                Stop stop = new Stop(id, name, lat, lon);
 
                 if (stopObject.get("parentStationId") != null) {
 
@@ -89,8 +98,8 @@ public class FutarToDB implements CommandLineRunner {
                 }
 
                 stopRepository.save(stop);
-
             }
+
 
         }
 
