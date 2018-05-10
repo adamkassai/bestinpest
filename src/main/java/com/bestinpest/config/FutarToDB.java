@@ -178,7 +178,7 @@ public class FutarToDB implements CommandLineRunner {
                             route = routeRepository.save(new Route(s1, s2, type));
                             routes.put(id, route);
 
-                            Relation relation = relationRepository.save(new Relation(id, "WALK", j2.getName(), "#FFFFFF", "#000000", route));
+                            Relation relation = relationRepository.save(new Relation(id, "WALK", j2.getName(), gameConfig.getWalkTextColor(), gameConfig.getWalkBackgroundColor(), route));
                             route.getRelations().add(relation);
                             routeRepository.save(route);
                         }

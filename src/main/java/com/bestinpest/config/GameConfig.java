@@ -16,6 +16,8 @@ public class GameConfig {
     private int cityRadius;
     private Map<String, Integer> tickets;
     private int maxWalkDistance;
+    private String walkBackgroundColor;
+    private String walkTextColor;
 
     public GameConfig() {
 
@@ -23,6 +25,8 @@ public class GameConfig {
         visibleCriminalRounds = Arrays.asList(3, 8, 13, 18);
         cityRadius = Integer.parseInt(System.getenv("BIP_CITY_RADIUS"));
         maxWalkDistance = Integer.parseInt(System.getenv("BIP_MAX_WALK_DISTANCE"));
+        walkBackgroundColor = System.getenv("BIP_WALK_BACKGROUND_COLOR");
+        walkTextColor = System.getenv("BIP_WALK_TEXT_COLOR");
 
         tickets = new HashMap<>();
         tickets.put("BUS-TROLLEY", 15);
@@ -49,5 +53,13 @@ public class GameConfig {
 
     public int getMaxWalkDistance() {
         return maxWalkDistance;
+    }
+
+    public String getWalkBackgroundColor() {
+        return walkBackgroundColor;
+    }
+
+    public String getWalkTextColor() {
+        return walkTextColor;
     }
 }
