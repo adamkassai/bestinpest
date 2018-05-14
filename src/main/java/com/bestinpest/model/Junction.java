@@ -1,6 +1,7 @@
 package com.bestinpest.model;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ public class Junction {
 
     private String name;
 
-    @OneToMany(mappedBy="junction")
+    @OneToMany(mappedBy="junction", fetch= FetchType.EAGER)
     private List<Stop> stops;
 
     public Junction() {
