@@ -1,5 +1,6 @@
 package com.bestinpest.controller;
 
+import com.bestinpest.RabbitMessage;
 import com.bestinpest.config.GameConfig;
 import com.bestinpest.exception.BadRequestException;
 import com.bestinpest.model.*;

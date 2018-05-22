@@ -1,5 +1,6 @@
 package com.bestinpest.controller;
 
+import com.bestinpest.RabbitMessage;
 import com.bestinpest.exception.NotFoundException;
 import com.bestinpest.model.*;
 import com.bestinpest.repository.*;
